@@ -65,7 +65,7 @@ app.get('/parsemap/:dir/:file', function(req, res) {
 app.get('/parseskin/:file', function(req, res) {
   var file = "nso/Skins/" + req.params.file + "/skin.ini";
   parser.parseSkinFile(file, function(err, skin) {
-    if (err) console.log(err);
+    if (err) { console.log(err); res.json(err) }
     res.json(skin);
   });
 });
