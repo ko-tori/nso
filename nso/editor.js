@@ -148,7 +148,7 @@ var anim = function() {
 
 $(function() {
   window.requestAnimationFrame(anim);
-  var socket = io.connect('https://nso-yoip.c9users.io/');
+  var socket = io.connect('/');
 
   socket.on('news', function(data) {
     lastnews = data;
