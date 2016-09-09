@@ -49,7 +49,7 @@ body {
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
-    cursor:default;
+    cursor: default;
 }
 
 #menubar>div:hover {
@@ -132,22 +132,31 @@ body {
     display: flex;
 }
 
-#gridcanvas, #grid {
-    top: 16%;
-    position: absolute;
-    margin: 0px auto;
-    height: 79vmin;
-    width: auto;
-    right: 0;
-    left: 0;
-    -webkit-user-drag: none;
-    user-drag: none;
-    -webkit-touch-callout: none;
+#gridcanvas{
+    position:absolute;
+    top:0;
+    left:0;
+    margin: 0;
+    padding: 0;
 }
 
 #grid {
+    top: 16%;
+    position: absolute;
+    left:50%;
+    /*transform:translateX(-50%);*/
+    height: 76vmin;
+    width: auto;
+    -webkit-user-drag: none;
+    user-drag: none;
+    -webkit-touch-callout: none;
+    /*display:none;*/
     opacity: .8;
-    z-index:-1;
+    z-index: 1;
+}
+
+#grid.crosshair {
+    cursor: crosshair;
 }
 
 #fileuploadpanel {
@@ -197,14 +206,14 @@ body {
 #bgoverlay {
     opacity: .3;
     background-color: #000;
-    z-index:-998;
+    z-index: -998;
 }
 
-#backgrounds{
+#backgrounds {
     z-index: -999;
 }
 
-.bg{
+.bg {
     z-index: -999;
     -webkit-background-size: cover;
     -moz-background-size: cover;
@@ -212,14 +221,14 @@ body {
     background-size: cover;
 }
 
-#backgrounds div{
+#backgrounds div {
     height: 100%;
     width: 100%;
     position: absolute;
     top: 0px;
     left: 0px;
-    margin:0;
-    padding:0;
+    margin: 0;
+    padding: 0;
 }
 
 #bottomsection>div {
@@ -360,15 +369,15 @@ body {
     height: 100%;
 }
 
-#loading{
+#loading {
     position: absolute;
     left: 50%;
-    top:50%;
-    -webkit-transform: translate(-50%,-50%);
-    transform: translate(-50%,-50%);
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
     font-family: "Century Gothic";
-    font-size:20px;
+    font-size: 20px;
     text-shadow: 0 0 2px #fff;
     color: white;
-    opacity:1;
+    opacity: 1;
 }

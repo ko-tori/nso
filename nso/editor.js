@@ -12,7 +12,8 @@ var lastnews, connected = false;
 var laststatus = 'Loading...',
   status = 'Loading...',
   skinname = 'Default',
-  skinopts, skin = {};
+  skinopts, skin = {},
+  ignoreSkinColors = false;
 var vars = {};
 
 var loadSkin = function(callback) {
@@ -275,8 +276,12 @@ var init = function(callback) {
     n++;
   }
   var si = [];
+  vars.maxsliderdur = 0;
   for (var i = 0; i < vars.objs.length; i++) {
-    if (vars.objs[i].objectName == 'slider') si.push(i);
+    if (vars.objs[i].objectName == 'slider') {
+      if (vars.objs[i].duration / 1000 > vars.maxsliderdur) vars.maxsliderdur = vars.objs[i].duration / 1000;
+      si.push(i);
+    }
   }
   var tintelements = ['hitcircle', 'approachcircle'];
   for (i = 0; i < tintelements.length; i++) {
@@ -308,6 +313,31 @@ var init = function(callback) {
   renderslidersasync(si, 0, callback); //async
 };
 
+var getIndexAt = function(t) {
+  for (var i = 0; i < vars.objs.length; i++) {
+    var obj = vars.objs[i];
+    if (obj.objectName == 'slider' || obj.objectName == 'spinner') {
+      if (t < obj.endTime / 1000) {
+        return i;
+      }
+    }
+    else {
+      if (t <= obj.startTime / 1000) {
+        return i;
+      }
+    }
+  }
+  return i - 1;
+}; //gets the index of the next or current object at time t
+
+var coords = function(x, y) {
+
+}; //osupixels to canvas coords
+
+var coords2 = function(x, y) {
+
+}; //viewport to osupixels
+
 var anim = function() {
   window.requestAnimationFrame(anim);
   var t = source !== undefined ? source.getCurrentTime() : 0;
@@ -326,12 +356,37 @@ var anim = function() {
       source.play(0);
   }
   var ctx = document.getElementById('gridcanvas').getContext('2d');
+  ctx.save();
 
-  //var renderFrom = t - 
+  var height = $(window).height() * .75;
+  var width = height * 4 / 3;
+  ctx.translate(($(window).width() - width) / 2, $(window).height() * .16);
+  ctx.scale(width / 512, height / 384);
+  ctx.clearRect(0, 0, 512, 384);
+
+  if (vars.objs) {
+    var renderFrom = getIndexAt(t - .8 - vars.maxsliderdur);
+    var renderTo = getIndexAt(t + vars.ar);
+    
+  }
+  ctx.restore();
+};
+
+var aligngrid = function() {
+  var height = $(window).height() * .75;
+  var width = height * 4 / 3;
+  document.getElementById('gridcanvas').setAttribute('width', $(document).width());
+  document.getElementById('gridcanvas').setAttribute('height', $(document).height());
+  var img = $('#grid');
+  img.css('left', ($(window).width() - width) / 2);
+  img.css('top', $(window).height() * .16);
+  img.css('width', width);
+  img.css('height', height);
 };
 
 loadSkin(function() {
   window.requestAnimationFrame(anim);
+  aligngrid();
   var socket = io.connect('/');
 
   socket.on('news', function(data) {
@@ -571,6 +626,7 @@ var captureMouseLocation = function(e) {
 };
 
 $(window).on('resize', function() {
+  aligngrid();
   if (source) {
     var track = $('#timelinetrack');
     for (var time in timelinemarks) {
