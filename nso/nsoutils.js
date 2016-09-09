@@ -1,12 +1,12 @@
-var cs = function(n) {
+var cspx = function(n) {
   return 88 - 8 * (n - 2);
 };
 
-var ar = function(n) {
+var ars = function(n) {
   return parseFloat((1.2 - (n >= 5 ? (n - 5) * .15 : (n - 5) * .12)).toFixed(4));
 };
 
-var od = function(n) {
+var ods = function(n) {
   return [.0795 - .006 * n, .1395 - .008 * n, .1995 - .01 * n];
 };
 

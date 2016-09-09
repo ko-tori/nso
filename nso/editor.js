@@ -11,6 +11,7 @@ var audioCtx = new AudioContext(),
 var lastnews, connected = false;
 var laststatus = 'Loading...',
   status = 'Loading...',
+  loading = true,
   skinname = 'Default',
   skinopts, skin = {},
   ignoreSkinColors = false;
@@ -84,6 +85,7 @@ var renderslidersasync = function(si, delay, callback) {
   vars.sliderpoints = {};
   vars.sliders = {};
   var i = 0;
+  var cs = cspx(parseFloat(beatmap['CircleSize']));
   var rendernext = function() {
     var obj = beatmap.hitObjects[si[i]];
     var border = skinopts.SliderBorder ? colorToArray(skinopts.SliderBorder) : [255, 255, 255];
@@ -91,15 +93,15 @@ var renderslidersasync = function(si, delay, callback) {
     switch (obj.curveType) {
       case 'pass-through':
         vars.sliderpoints[si[i]] = passthrough(obj.points, obj.pixelLength);
-        vars.sliders[si[i]] = render_curve(vars.sliderpoints[si[i]], vars.cs, trackcolor, border);
+        vars.sliders[si[i]] = render_curve(vars.sliderpoints[si[i]], cs, trackcolor, border);
         break;
       case 'bezier':
         vars.sliderpoints[si[i]] = bezier(obj.points, obj.pixelLength);
-        vars.sliders[si[i]] = render_curve(vars.sliderpoints[si[i]], vars.cs, trackcolor, border);
+        vars.sliders[si[i]] = render_curve(vars.sliderpoints[si[i]], cs, trackcolor, border);
         break;
       case 'linear':
         vars.sliderpoints[si[i]] = line(obj.points, obj.pixelLength)[0];
-        vars.sliders[si[i]] = render_curve(vars.sliderpoints[si[i]], vars.cs, trackcolor, border);
+        vars.sliders[si[i]] = render_curve(vars.sliderpoints[si[i]], cs, trackcolor, border);
         break;
     }
     i++;
@@ -151,7 +153,7 @@ function createSound(buffer, context, loop) {
     else offset = offset || pausedAt;
     startedAt = context.currentTime - offset;
     sourceNode.start(delay || 0, offset);
-    pausedAt = 0;
+    pausedAt = false;
     playing = true;
   };
 
@@ -182,17 +184,21 @@ function createSound(buffer, context, loop) {
   };
 
   var getCurrentTime = function() {
-    if (pausedAt % buffer.duration) {
+    if (pausedAt !== false) {
       return pausedAt;
     }
     if (startedAt) {
-      return (context.currentTime - startedAt) % buffer.duration;
+      return (context.currentTime - startedAt);
     }
     return 0;
   };
 
   var getDuration = function() {
     return buffer.duration;
+  };
+
+  var getInfo = function(){
+    return [pausedAt, startedAt]
   };
 
   return {
@@ -203,23 +209,14 @@ function createSound(buffer, context, loop) {
     pause: pause,
     stop: stop,
     gain: gain,
-    volume: volume
+    volume: volume,
+    getInfo: getInfo
   };
 }
 
 var init = function(callback) {
-  vars.ar = ar(parseFloat(beatmap['ApproachRate']));
-  vars.od = od(parseFloat(beatmap['OverallDifficulty']));
-  vars.cs = cs(parseFloat(beatmap['CircleSize']));
-  vars.stackl = parseFloat(beatmap['StackLeniency']);
-  vars.leadin = parseFloat(beatmap['AudioLeadIn']);
-  vars.sliderx = parseFloat(beatmap['SliderMultiplier']);
-  vars.tickrate = parseFloat(beatmap['SliderTickRate']);
-  vars.breaks = beatmap['breakTimes'];
-  vars.tpts = beatmap['timingPoints'];
-  vars.tptn = 0;
-  vars.sliderprog = false;
-  vars.objs = beatmap['hitObjects'];
+  var breaks = beatmap['breakTimes'],
+    tptn = 0;
   var n = 1;
   if (skinname != 'Default' && skinopts.Combo1 && !ignoreSkinColors) {
     vars.cols = [];
@@ -251,8 +248,8 @@ var init = function(callback) {
   n = 0, j = 1;
   var maxc = 1,
     tptn = -1;
-  for (i = 0; i < vars.objs.length; i++) {
-    if (i == 0 || vars.objs[i].newCombo) {
+  for (i = 0; i < beatmap['hitObjects'].length; i++) {
+    if (i == 0 || beatmap['hitObjects'][i].newCombo) {
       if (j > maxc) {
         maxc = j;
       }
@@ -262,8 +259,8 @@ var init = function(callback) {
     vars.objc.push([n % vars.cols.length, j]);
     j++;
 
-    if (vars.objs[i].startTime >= vars.tpts[tptn])
-      vars.objs[i].tptn = tptn;
+    if (beatmap['hitObjects'][i].startTime >= beatmap['timingPoints'][tptn])
+      beatmap['hitObjects'][i].tptn = tptn;
   }
   n = 10;
   while (n <= maxc) {
@@ -277,16 +274,20 @@ var init = function(callback) {
   }
   var si = [];
   vars.maxsliderdur = 0;
-  for (var i = 0; i < vars.objs.length; i++) {
-    if (vars.objs[i].objectName == 'slider') {
-      if (vars.objs[i].duration / 1000 > vars.maxsliderdur) vars.maxsliderdur = vars.objs[i].duration / 1000;
+  for (var i = 0; i < beatmap['hitObjects'].length; i++) {
+    if (beatmap['hitObjects'][i].objectName == 'slider') {
+      if (beatmap['hitObjects'][i].duration / 1000 > vars.maxsliderdur) vars.maxsliderdur = beatmap['hitObjects'][i].duration / 1000;
       si.push(i);
     }
   }
-  var tintelements = ['hitcircle', 'approachcircle'];
+  var tintelements = ['hitcircle', 'approachcircle', 'sliderb0'];
   for (i = 0; i < tintelements.length; i++) {
     for (j = 0; j < vars.cols.length; j++) {
-      skin[tintelements[i] + j] = tint(skin[tintelements[i]], vars.cols[j]);
+      if(tintelements[i] == 'sliderb0'){
+        skin[tintelements[i] + j] = tint(skin[tintelements[i]], '#000000');
+      }
+      else
+        skin[tintelements[i] + j] = tint(skin[tintelements[i]], vars.cols[j]);
     }
   }
   $('#timeline1c .timelinemark').remove();
@@ -314,8 +315,8 @@ var init = function(callback) {
 };
 
 var getIndexAt = function(t) {
-  for (var i = 0; i < vars.objs.length; i++) {
-    var obj = vars.objs[i];
+  for (var i = 0; i < beatmap['hitObjects'].length; i++) {
+    var obj = beatmap['hitObjects'][i];
     if (obj.objectName == 'slider' || obj.objectName == 'spinner') {
       if (t < obj.endTime / 1000) {
         return i;
@@ -355,21 +356,131 @@ var anim = function() {
     if (loopsource)
       source.play(0);
   }
-  var ctx = document.getElementById('gridcanvas').getContext('2d');
-  ctx.save();
+  if (vars.sliders && beatmap && beatmap['hitObjects']) {
+    var ctx = document.getElementById('gridcanvas').getContext('2d');
+    ctx.save();
+    ctx.clearRect(0, 0, $(window).width(), $(window).height());
+  
+    var height = $(window).height() * .75;
+    var width = height * 4 / 3;
+    ctx.translate(($(window).width() - width) / 2, $(window).height() * .16);
+    ctx.scale(width / 512, height / 384);
 
-  var height = $(window).height() * .75;
-  var width = height * 4 / 3;
-  ctx.translate(($(window).width() - width) / 2, $(window).height() * .16);
-  ctx.scale(width / 512, height / 384);
-  ctx.clearRect(0, 0, 512, 384);
+    var ar = ars(parseFloat(beatmap['ApproachRate']));
+    var od = ods(parseFloat(beatmap['OverallDifficulty']));
+    var cs = cspx(parseFloat(beatmap['CircleSize']));
+    var stackl = parseFloat(beatmap['StackLeniency']);
+    var sliderx = parseFloat(beatmap['SliderMultiplier']);
+    var tickrate = parseFloat(beatmap['SliderTickRate']);
+    var objs = beatmap['hitObjects'];
+    var sd = vars.sliders;
+    var fadetime = .25,
+      fadetime2 = .8;
+    var renderFrom = getIndexAt(t - fadetime2 - vars.maxsliderdur);
+    var renderTo = getIndexAt(t + ar);
 
-  if (vars.objs) {
-    var renderFrom = getIndexAt(t - .8 - vars.maxsliderdur);
-    var renderTo = getIndexAt(t + vars.ar);
-
+    for(var i = renderTo; i >= renderFrom; i--){
+      var obj = objs[i];
+      var ot = obj.objectName;
+      var col = vars.objc[i][0];
+      var offset = obj.startTime / 1000;
+      var endTime = obj.endTime / 1000;
+      var x = obj.position[0] - cs / 2,
+        y = obj.position[1] - cs / 2;
+      var td = offset - t;
+      
+      if (endTime === undefined) endTime = offset;
+      if (td > ar)
+        continue;
+      else if (ot != 'spinner') {
+        ctx.save(); // save 2
+        var r;
+        if (ot == 'slider' && sd[i]) {
+          if (td > 0) ctx.globalAlpha = 2 - 2 * td / ar;
+          else ctx.globalAlpha = Math.max(1 - (t - endTime) / fadetime, 0);
+          ctx.drawImage(sd[i][0], sd[i][1][0], sd[i][1][1], sd[i][0].width / 2, sd[i][0].height / 2);
+          r = obj.repeatCount;
+          
+          for(var p = 1; p < r; p++){
+            
+          }
+          if(td <= 0 && obj.duration / 1000 + td > -.2){
+            var prog = - td / obj.duration * 1000; // progress percentage (0-1)
+            var curp = prog * r; // current progress (equivalent to distance traveled divided by slider length)
+            var dir = 1 - 2 * (Math.floor(curp) % 2); // direction the ball is traveling, 1 for normal, -1 for reverse
+            var distance = curp % 1 * obj.pixelLength;
+            var j = dir == 1 ? 0 : vars.sliderpoints[i].length - 1;
+            var jend = dir == 1 ? vars.sliderpoints[i].length - 1 : 0;
+            while(j != jend){
+              var p1 = vars.sliderpoints[i][j];
+              var p2 = vars.sliderpoints[i][j+dir];
+              var dpart = dist(p1, p2);
+              if(dpart > distance){
+                //without extra interpolation stuff
+                //ctx.drawImage(skin['sliderb0'], p1[0] - cs / 2, p1[1] - cs / 2, cs, cs);
+                if(obj.duration / 1000 + td > 0){
+                  var posx = p1[0] + distance / dpart * (p2[0] - p1[0]), posy = p1[1] + distance / dpart * (p2[1] - p1[1]);
+                  var cs2 = cs * 11 / 12;
+                  ctx.save();
+                  ctx.translate(posx, posy);
+                  ctx.rotate(Math.atan2(p2[1]-p1[1],p2[0]-p1[0]));
+                  ctx.drawImage(skin['sliderb0' + col], - cs2 / 2, - cs2 / 2, cs2, cs2);
+                  ctx.restore();
+                }
+                else{
+                  var temp = r%2 ? vars.sliderpoints[i].length - 1 : 0;
+                  var posx = vars.sliderpoints[i][temp][0], posy = vars.sliderpoints[i][temp][1];
+                }
+                ctx.save();
+                var r_fs = td > -.1 ? 2*cs*-td*10 : (td < -obj.duration / 1000 ? 2*cs+(td + obj.duration / 1000) * 5 * .5 * cs : 2*cs);
+                ctx.drawImage(skin['sliderfollowcircle'], posx - r_fs / 2, posy - r_fs / 2, r_fs, r_fs);
+                ctx.restore();
+                break;
+              }
+              else{
+                distance -= dpart;
+              }
+              j += dir;
+            }
+          }
+        }
+        if (td > 0) {
+          ctx.globalAlpha = 2 - 2 * td / ar;
+          var r_as = cs * (2 * td / ar + 1);
+          ctx.drawImage(skin['approachcircle' + col], x + cs / 2 - r_as / 2, y + cs / 2 - r_as / 2, r_as, r_as);
+          ctx.drawImage(skin['hitcircle' + col], x, y, cs, cs);
+        }
+        else {
+          ctx.globalAlpha = Math.max(1 + td / fadetime2, 0);
+          var r_as = cs * Math.min(-td / ar + 1, 13/12);
+          ctx.drawImage(skin['approachcircle' + col], x + cs / 2 - r_as / 2, y + cs / 2 - r_as / 2, r_as, r_as);
+          ctx.drawImage(skin['hitcircle'], x, y, cs, cs);
+        }
+        
+        var drawOverlay = function() {
+          ctx.drawImage(skin.hitcircleoverlay, x, y, cs, cs);
+        };
+        var drawNumber = function() {
+          if (td > 0) {
+            var num = skin['default-' + vars.objc[i][1]];
+            var newh = num.height/skin['hitcircle'].height*cs*3/4;
+            var dh = newh / num.height;
+            ctx.drawImage(num, x - num.width * dh / 2 + cs / 2, y - newh / 2 + cs / 2, num.width * dh, newh);
+          }
+        };
+        if (parseInt(skinopts.HitCircleOverlayAboveNumber || skinopts.HitCircleOverlayAboveNumer, 10)) {
+          drawNumber();
+          drawOverlay();
+        }
+        else {
+          drawOverlay();
+          drawNumber();
+        }
+        ctx.restore(); // restore 2
+      }
+    }
+      ctx.restore();
   }
-  ctx.restore();
 };
 
 var aligngrid = function() {
@@ -407,6 +518,7 @@ loadSkin(function() {
   socket.on('connect', function() {
     $('#cover').fadeOut();
     $('#loading').fadeOut();
+    loading = false;
     connected = true;
     var delivery = new Delivery(socket);
     delivery.on('delivery.connect', function(delivery) {
@@ -416,8 +528,10 @@ loadSkin(function() {
         $("#fileuploadpanel").slideDown();
       });
       $("#cover").click(function() {
-        $("#cover").fadeOut();
-        $("#fileuploadpanel").slideUp();
+        if(!loading){
+          $("#cover").fadeOut();
+          $("#fileuploadpanel").slideUp();
+        }
       });
 
       function upload(file) {
@@ -459,6 +573,7 @@ loadSkin(function() {
                     if (source) source.stop();
                     source = createSound(buffer, audioCtx);
                     init(function() {
+                      loading = false;
                       $('#loading').fadeOut();
                       $("#cover").fadeOut();
                       source.play();
@@ -472,6 +587,7 @@ loadSkin(function() {
             }
             socket.removeListener('osu', temp);
           }
+          loading = true;
           $('#loading').fadeIn();
           socket.on('osu', temp);
         }, function(e) {
@@ -612,7 +728,7 @@ var wheelupdate = function(e) {
 
   }
   else if (source) {
-    var pos = Math.min(source.getDuration(), Math.max(0, source.getCurrentTime() - (e.wheelDelta || -e.detail) / 100 * (e.shiftKey ? 3 : 1)));
+    var pos = Math.min(source.getDuration(), Math.max(0, source.getCurrentTime() - (e.wheelDelta || -e.detail) / 200 * (e.shiftKey ? 3 : 1)));
     if (pos > .9995 * source.getDuration()) source.pause(source.getDuration() - .1);
     else if (source.getPlaying())
       source.play(pos);
