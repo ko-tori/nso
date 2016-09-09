@@ -7,7 +7,8 @@ html a {
 html,
 body {
     max-width: 100%;
-    overflow-x: hidden;
+    overflow: hidden;
+    /*overflow-x: hidden;*/
 }
 
 body {
@@ -132,26 +133,28 @@ body {
     display: flex;
 }
 
-#gridcanvas{
-    position:absolute;
-    top:0;
-    left:0;
+#gridcanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     margin: 0;
     padding: 0;
 }
 
+.gridtemp {
+    transform: translateX(-50%);
+}
+
 #grid {
     top: 16%;
+    left: 50%;
     position: absolute;
-    left:50%;
-    /*transform:translateX(-50%);*/
     height: 76vmin;
     width: auto;
     -webkit-user-drag: none;
     user-drag: none;
     -webkit-touch-callout: none;
-    /*display:none;*/
-    opacity: .8;
+    opacity: .67;
     z-index: 1;
 }
 
@@ -282,8 +285,8 @@ body {
     position: absolute;
     box-shadow: 0px 0px 10px #fff;
     height: 75%;
-    opacity: .9;
-    z-index: 2;
+    opacity: .8;
+    z-index: 10;
     width: 3px;
     margin-left: -1px;
     background: #ffffff;

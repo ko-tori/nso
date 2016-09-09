@@ -367,7 +367,7 @@ var anim = function() {
   if (vars.objs) {
     var renderFrom = getIndexAt(t - .8 - vars.maxsliderdur);
     var renderTo = getIndexAt(t + vars.ar);
-    
+
   }
   ctx.restore();
 };
@@ -387,6 +387,7 @@ var aligngrid = function() {
 loadSkin(function() {
   window.requestAnimationFrame(anim);
   aligngrid();
+  $('#grid').removeClass('gridtemp');
   var socket = io.connect('/');
 
   socket.on('news', function(data) {
@@ -646,4 +647,8 @@ $(window).on('resize', function() {
 document.addEventListener("mousemove", captureMouseLocation, false);
 document.addEventListener("mousewheel", wheelupdate, {
   passive: true
+});
+document.addEventListener("contextmenu", function(e) {
+  e.preventDefault();
+  console.log('rightclick! :o');
 });
