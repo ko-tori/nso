@@ -30,18 +30,6 @@ var sliderloadv2 = false;
 var keys = Array(256);
 var mousebtns = [false, false];
 
-var cs = function(n) {
-  return 88 - 8 * (n - 2);
-};
-
-var ar = function(n) {
-  return parseFloat((1.2 - (n >= 5 ? (n - 5) * .15 : (n - 5) * .12)).toFixed(4));
-};
-
-var od = function(n) {
-  return [.0795 - .006 * n, .1395 - .008 * n, .1995 - .01 * n];
-};
-
 // input
 
 var hit = function(){
@@ -372,59 +360,6 @@ var loadSkin = function(callback) {
       loaded();
     };
   }
-};
-
-var e = function(img){ // check if image is empty
-  return img.width == 0 && img.height == 0;
-};
-
-var concatImages = function(arr, overlap) {
-  if(!overlap) overlap = 0;
-  var canvas = document.createElement('canvas');
-  var maxh = arr[0].height,
-    w = arr[0].width;
-  for (var i = 1; i < arr.length; i++) {
-    if (arr[i].height > maxh) maxh = arr[i].height;
-    w += arr[i].width - overlap;
-  }
-  canvas.width = w;
-  canvas.height = maxh;
-  var x = 0;
-  var ctx = canvas.getContext('2d');
-  for (i = 0; i < arr.length; i++) {
-    ctx.drawImage(arr[i], x, (maxh - arr[i].height) / 2);
-    x += arr[i].width - overlap;
-  }
-  return canvas;
-};
-
-var tint = function(img, col) {
-  var canvas = document.createElement('canvas');
-  canvas.height = img.height;
-  canvas.width = img.width;
-  var ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0);
-  var w = img.width,
-    h = img.height;
-  var imgdata = ctx.getImageData(0, 0, w, h);
-  var rgba = imgdata.data;
-  //console.log(imgdata.data);
-  for (var px = 0, ct = w * h * 4; px < ct; px += 4) {
-    rgba[px] *= col[0] / 255;
-    rgba[px + 1] *= col[1] / 255;
-    rgba[px + 2] *= col[2] / 255;
-  }
-  ctx.putImageData(imgdata, 0, 0);
-  return canvas;
-};
-
-var colorToArray = function(s) {
-  var color = s.split(',');
-  var temp = [];
-  for (var i = 0; i < color.length; i++) {
-    temp.push(parseFloat(color[i]));
-  }
-  return temp;
 };
 
 var renderslidersasync = function(si, delay, callback) {

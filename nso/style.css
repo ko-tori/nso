@@ -1,0 +1,374 @@
+html,
+html a {
+    -webkit-font-smoothing: antialiased;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
+}
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    margin: 0px;
+    background-color: #000;
+}
+
+#container {
+    z-index: -1;
+    top: 24px;
+    background-color: #222222;
+    position: absolute;
+    width: 100%;
+    height: auto;
+    bottom: 0;
+    cursor: default;
+}
+
+#menubar {
+    z-index: 1;
+    cursor: default;
+    width: 100%;
+    height: 20px;
+    background-color: #F5F5F5;
+    padding: 2px 6px;
+}
+
+#menubar>div {
+    display: inline-block;
+    font-family: sans-serif;
+    font-size: 12px;
+    padding: 2px 8px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.noselect {
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    cursor:default;
+}
+
+#menubar>div:hover {
+    background-color: #e5e5e5;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    background-color: #e5e5e5;
+    max-width: 200px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown>div {
+    padding: 8px 12px;
+    display: block;
+    text-align: left;
+    cursor: pointer;
+}
+
+.dropdown a {
+    color: black;
+    text-decoration: none;
+}
+
+.dropdown>div:hover {
+    background-color: #f9f9f9;
+}
+
+.submenu {
+    display: none;
+    position: absolute;
+    background-color: #e5e5e5;
+    max-width: 200px;
+    margin-top: -22px;
+    left: 100%;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.submenu>div {
+    padding: 8px 12px;
+    display: block;
+    text-align: left;
+    cursor: pointer;
+}
+
+.submenu>div:hover {
+    background-color: #f9f9f9;
+}
+
+.dir:hover .submenu {
+    display: block;
+}
+
+#menubar>div:hover .dropdown {
+    display: block;
+}
+
+.dir span {
+    float: right;
+    margin-right: -8px;
+    padding-left: 40px;
+}
+
+#topsection {
+    top: 0px;
+    width: 100%;
+    height: 15%;
+    background-color: rgba(0, 0, 0, .5);
+    position: absolute;
+}
+
+#bottomsection {
+    bottom: 0px;
+    width: 100%;
+    height: 5%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, .5));
+    position: absolute;
+    display: flex;
+}
+
+#gridcanvas, #grid {
+    top: 16%;
+    position: absolute;
+    margin: 0px auto;
+    height: 79vmin;
+    width: auto;
+    right: 0;
+    left: 0;
+    -webkit-user-drag: none;
+    user-drag: none;
+    -webkit-touch-callout: none;
+}
+
+#grid {
+    opacity: .8;
+    z-index:-1;
+}
+
+#fileuploadpanel {
+    padding: 10px;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    height: 400px;
+    width: 400px;
+    margin-left: -200px;
+    text-align: center;
+    margin-top: 50px;
+    left: 50%;
+    position: absolute;
+    display: none;
+    z-index: 10;
+}
+
+#dragarea {
+    border: 5px dashed #f4f4f4;
+    border-radius: 20px;
+    height: 300px;
+    line-height: 300px;
+    width: 300px;
+    margin: 10px auto;
+    color: #dddddd;
+    font-size: 20px;
+    font-family: sans-serif;
+    cursor: pointer;
+}
+
+#dragarea:hover {
+    background-color: #fafafa;
+}
+
+#dragarea span {
+    vertical-align: middle;
+}
+
+.is-dragover {
+    background-color: #fafafa;
+}
+
+.is-dragover span {
+    color: #fafafa;
+}
+
+#bgoverlay {
+    opacity: .3;
+    background-color: #000;
+    z-index:-998;
+}
+
+#backgrounds{
+    z-index: -999;
+}
+
+.bg{
+    z-index: -999;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+#backgrounds div{
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    margin:0;
+    padding:0;
+}
+
+#bottomsection>div {
+    display: inline-block;
+}
+
+#time,
+#progress {
+    font-family: "Century Gothic";
+    text-shadow: 0 0 2px #fff;
+    color: white;
+    position: relative;
+    top: 35%;
+    transform: translateY(-50%);
+}
+
+#time {
+    font-size: 2.4vmin;
+    height: 30%;
+    padding-left: 1%;
+}
+
+#progress {
+    font-size: 2vmin;
+    height: 25%;
+    top: 45%;
+    padding-left: 1.5%;
+    width: 4.2%;
+}
+
+#timeline1c {
+    width: 60%;
+    height: 100%;
+    padding-left: 1%;
+    /*position:absolute;*/
+}
+
+#timelinetrack {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 1px;
+    cursor: default;
+    background: #999;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#timelinebar {
+    display: block;
+    position: absolute;
+    box-shadow: 0px 0px 10px #fff;
+    height: 75%;
+    opacity: .9;
+    z-index: 2;
+    width: 3px;
+    margin-left: -1px;
+    background: #ffffff;
+    cursor: default;
+    top: 12.5%;
+}
+
+.timelinemark {
+    display: block;
+    position: absolute;
+    opacity: .5;
+    z-index: 1;
+    width: 1px;
+    margin-left: 0px;
+    cursor: default;
+}
+
+.previewtime {
+    top: 1%;
+    background-color: #fff04d;
+    height: 99%;
+}
+
+.uninheritedpoint {
+    z-index: 3;
+    top: 1%;
+    background-color: #cc0000;
+    height: 48%;
+}
+
+.inheritedpoint {
+    z-index: 3;
+    top: 1%;
+    background-color: #67a030;
+    height: 48%;
+}
+
+.bookmark {
+    z-index: 2;
+    top: 52%;
+    background-color: #4d79ff;
+    height: 48%;
+}
+
+#playcontrols {
+    width: 6.5%;
+    position: relative;
+    left: .5%;
+}
+
+#playcontrols img {
+    position: absolute;
+    height: 3vmin;
+    top: 1vmin;
+    transition: all .1s;
+    -webkit-filter: blur(.6px);
+    filter: blur(.6px);
+}
+
+#playcontrols img.scalable:hover {
+    transform: scale(1.2);
+}
+
+#editorplay {
+    left: 10%;
+}
+
+#editorpause {
+    left: 50%;
+}
+
+#editorstop {
+    left: 90%;
+}
+
+#cover {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, .6);
+    z-index: 9;
+    width: 100%;
+    height: 100%;
+}
+
+#loading{
+    position: absolute;
+    left: 50%;
+    top:50%;
+    -webkit-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);
+    font-family: "Century Gothic";
+    font-size:20px;
+    text-shadow: 0 0 2px #fff;
+    color: white;
+    opacity:1;
+}
