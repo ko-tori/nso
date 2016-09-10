@@ -250,6 +250,7 @@ var passthrough = function(p, l, step) {
     x = (m1 * x1 - m2 * x2 - y1 + y2) / (m1 - m2);
     y = m1 * (x - x1) + y1;
   }
+
   var r = dist([x, y], a),
     t = l / r,
     t1 = Math.atan2(a[1] - y, a[0] - x),

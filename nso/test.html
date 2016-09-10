@@ -1,26 +1,24 @@
 <html>
     <head><title>test</title>
-    <script type="text/javascript" src="sliderlib.js"></script></head>
+    <script type="text/javascript" src="nsoutils2.js"></script></head>
     <body>
-        
+        <canvas id="a" width="1000px" height="1000px"></canvas>
         <script type="text/javascript">
-            
-            var start = new Date().getTime();
-            
-            var a=bezier([[0, 96], [24, 124], [32, 184], [36, 280], [24, 308], [24, 308], [48, 224], [0, 160], [24, 100], [24, 100], [72, 92], [136, 112], [160, 152], [144, 188], [100, 208], [44, 212], [24, 208], [8, 204], [4, 204], [44, 188], [84, 184], [124, 196], [152, 236], [152, 280], [92, 300], [32, 304], [16, 304], [16, 304], [56, 288], [92, 308], [104, 316], [132, 308], [132, 308], [164, 256], [176, 196], [192, 124], [184, 92], [184, 92], [236, 116], [308, 196], [312, 276], [320, 308], [320, 308], [212, 280], [140, 244], [124, 212], [124, 212], [164, 188], [280, 200], [344, 220], [344, 220], [368, 212], [440, 172], [448, 120], [436, 100], [384, 76], [328, 76], [288, 92], [268, 120], [256, 152], [256, 184], [256, 196], [256, 196], [276, 212], [324, 216], [376, 228], [420, 252], [432, 276], [376, 332], [324, 328], [280, 332], [240, 320], [240, 320], [284, 316], [412, 272], [456, 236], [492, 184], [532, 148], [552, 116], [544, 84], [516, 72], [464, 60], [416, 68], [364, 100], [344, 144], [336, 172], [336, 172], [368, 188], [412, 204], [476, 232], [520, 260], [544, 296], [504, 340], [456, 356], [388, 348], [364, 360], [336, 352]],3599.99990463257);
-            document.body.appendChild(render_curve(a,42)[0]);
-            
-            var end = new Date().getTime();
-            var time = end - start;
-            console.log('Execution time: ' + time);
-            for(var i = 2; i < 20; i+=2){
-                start = new Date().getTime();
-            a=passthrough([[0, 0], [0,50], [20, 0]],150,4);
-            document.body.appendChild(render_curve(a,40)[0]);
-            
-            var end = new Date().getTime();
-            var time = end - start;
-            console.log(i+'Execution time: ' + time);
+            var canvas = document.getElementById('a');
+            var ctx = canvas.getContext('2d');
+            var pts = [[276,368],[316,368],[356,352]];
+            // var pts = [[276,368],[276,302],[356,352]];
+            // var pts2 = passthrough(pts,200);
+            var pts2 = passthrough(pts,75);
+            var res = render_curve(pts2,72);
+            ctx.drawImage(res[0], res[1][0]-36, res[1][1]-36, res.width, res.height);
+            ctx.fillStyle='#FF0000';
+            for(var i = 0; i < pts2.length; i++){
+                ctx.fillRect(pts2[i][0]-1, pts2[i][1]-1,2,2);
+            }
+            ctx.fillStyle='#000000';
+            for(var i = 0; i < pts.length; i++){
+                ctx.fillRect(pts[i][0]-1, pts[i][1]-1,2,2);
             }
         </script>
     </body>

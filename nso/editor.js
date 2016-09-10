@@ -15,7 +15,10 @@ var laststatus = 'Loading...',
   skinname = 'Default',
   skinopts, skin = {},
   ignoreSkinColors = false;
-var vars = {};
+var vars = {
+  beatsnapdivisor: 4,
+  distancesnap: 1
+};
 
 var loadSkin = function(callback) {
   status = "Loading Skin... 0%";
@@ -331,6 +334,14 @@ var getIndexAt = function(t) {
   return i - 1;
 }; //gets the index of the next or current object at time t
 
+var getTimingPointAt = function(t) {
+  for (var i = 0; i < beatmap['timingPoints'].length; i++) {
+    var tpt = beatmap['timingPoints'][i];
+    if (tpt.offset/1000 > t) return beatmap['timingPoints'][Math.max(i - 1, 0)];
+  }
+  return beatmap['timingPoints'][Math.max(i - 1, 0)];
+}; //returns timing point at t
+
 var coords = function(x, y) {
 
 }; //osupixels to canvas coords
@@ -357,7 +368,8 @@ var anim = function() {
       source.play(0);
   }
   if (vars.sliders && beatmap && beatmap['hitObjects']) {
-    var ctx = document.getElementById('gridcanvas').getContext('2d');
+    var canvas = document.getElementById('gridcanvas');
+    var ctx = canvas.getContext('2d');
     ctx.save();
     ctx.clearRect(0, 0, $(window).width(), $(window).height());
   
@@ -380,6 +392,7 @@ var anim = function() {
     var renderTo = getIndexAt(t + ar);
 
     for(var i = renderTo; i >= renderFrom; i--){
+      if(!vars.objc[i]) continue;
       var obj = objs[i];
       var ot = obj.objectName;
       var col = vars.objc[i][0];
@@ -423,7 +436,7 @@ var anim = function() {
                   var cs2 = cs * 11 / 12;
                   ctx.save();
                   ctx.translate(posx, posy);
-                  ctx.rotate(Math.atan2(p2[1]-p1[1],p2[0]-p1[0]));
+                  ctx.rotate(Math.atan2(p2[1]-p1[1],p2[0]-p1[0]) + (skinopts.SliderBallFlip==0 && dir==-1 ? Math.PI : 0));
                   ctx.drawImage(skin['sliderb0' + col], - cs2 / 2, - cs2 / 2, cs2, cs2);
                   ctx.restore();
                 }
@@ -432,7 +445,7 @@ var anim = function() {
                   var posx = vars.sliderpoints[i][temp][0], posy = vars.sliderpoints[i][temp][1];
                 }
                 ctx.save();
-                var r_fs = td > -.1 ? 2*cs*-td*10 : (td < -obj.duration / 1000 ? 2*cs+(td + obj.duration / 1000) * 5 * .5 * cs : 2*cs);
+                var r_fs = td > -.1 ? cs*(1-td*10) : (td < -obj.duration / 1000 ? 2*cs+(td + obj.duration / 1000) * 5 * .5 * cs : 2*cs);
                 ctx.drawImage(skin['sliderfollowcircle'], posx - r_fs / 2, posy - r_fs / 2, r_fs, r_fs);
                 ctx.restore();
                 break;
@@ -447,6 +460,7 @@ var anim = function() {
         if (td > 0) {
           ctx.globalAlpha = 2 - 2 * td / ar;
           var r_as = cs * (2 * td / ar + 1);
+          //console.log(skin['approachcircle' + col],skin['hitcircle' + col]);
           ctx.drawImage(skin['approachcircle' + col], x + cs / 2 - r_as / 2, y + cs / 2 - r_as / 2, r_as, r_as);
           ctx.drawImage(skin['hitcircle' + col], x, y, cs, cs);
         }
@@ -479,7 +493,7 @@ var anim = function() {
         ctx.restore(); // restore 2
       }
     }
-      ctx.restore();
+    ctx.restore();
   }
 };
 
@@ -727,8 +741,14 @@ var wheelupdate = function(e) {
   else if (e.ctrlKey) {
 
   }
-  else if (source) {
-    var pos = Math.min(source.getDuration(), Math.max(0, source.getCurrentTime() - (e.wheelDelta || -e.detail) / 200 * (e.shiftKey ? 3 : 1)));
+  else if (source && beatmap) {
+    var tpt = getTimingPointAt(source.getCurrentTime());
+    var pos = Math.min(source.getDuration(),
+      Math.max(0, source.getCurrentTime() - ((e.wheelDelta || -e.detail) / 120 
+      * tpt.beatLength / 1000
+      / vars.beatsnapdivisor
+      * (source.getPlaying() ? 2 : 1)
+      * (e.shiftKey ? tpt.timingSignature : 1))));
     if (pos > .9995 * source.getDuration()) source.pause(source.getDuration() - .1);
     else if (source.getPlaying())
       source.play(pos);
