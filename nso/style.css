@@ -125,6 +125,14 @@ body {
     position: absolute;
 }
 
+#mousepos{
+    font-family: "Century Gothic";
+    text-shadow: 0 0 2px #fff;
+    color: white;
+    padding:10px;
+    float:right;
+}
+
 #bottomsection {
     bottom: 0px;
     width: 100%;

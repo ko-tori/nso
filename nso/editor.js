@@ -17,7 +17,9 @@ var laststatus = 'Loading...',
   ignoreSkinColors = false;
 var vars = {
   beatsnapdivisor: 4,
-  distancesnap: 1
+  distancesnap: 1,
+  gridlevel: 4,
+  gridsnap: true
 };
 
 var loadSkin = function(callback) {
@@ -201,7 +203,7 @@ function createSound(buffer, context, loop) {
   };
 
   var getInfo = function(){
-    return [pausedAt, startedAt]
+    return [pausedAt, startedAt];
   };
 
   return {
@@ -367,14 +369,22 @@ var anim = function() {
     if (loopsource)
       source.play(0);
   }
+  var height = $(window).height() * .75;
+  var width = height * 4 / 3;
+  function r(n){
+    var d = vars.gridsnap ? vars.gridlevel : 1;
+    return Math.round(n/d)*d;
+  };
+  var mx = r((mousex - $('#grid').offset().left) / width * 512),
+    my = r((mousey - $('#grid').offset().top) / height * 384);
+  $('#mousepos').html('x:'+ mx + ' y:' + my);
+  //console.log(mousex,mousey);
   if (vars.sliders && beatmap && beatmap['hitObjects']) {
     var canvas = document.getElementById('gridcanvas');
     var ctx = canvas.getContext('2d');
     ctx.save();
     ctx.clearRect(0, 0, $(window).width(), $(window).height());
-  
-    var height = $(window).height() * .75;
-    var width = height * 4 / 3;
+    
     ctx.translate(($(window).width() - width) / 2, $(window).height() * .16);
     ctx.scale(width / 512, height / 384);
 
@@ -562,7 +572,7 @@ loadSkin(function() {
             }
             else {
               beatmap = data;
-              if (beatmap.bgFilename) {
+              if (beatmap.bgFilename && zip.file(beatmap.bgFilename)) {
                 zip.file(beatmap.bgFilename).async('base64').then(function(content) {
                   var $old = $('#backgrounds .bg')
                   var $new = $old.clone();
@@ -581,7 +591,7 @@ loadSkin(function() {
                   .css('background-size', '');
                 console.log('%cThis map has no background!', 'color: #F00');
               }
-              if (beatmap.AudioFilename) {
+              if (beatmap.AudioFilename && zip.file(beatmap.AudioFilename)) {
                 zip.file(beatmap.AudioFilename).async('arraybuffer').then(function(content) {
                   audioCtx.decodeAudioData(content).then(function(buffer) {
                     if (source) source.stop();
@@ -597,6 +607,10 @@ loadSkin(function() {
               }
               else {
                 console.log('%cThis map has no audio!', 'color: #F00');
+                source = undefined;
+                loading = false;
+                $('#loading').fadeOut();
+                $("#cover").fadeOut();
               }
             }
             socket.removeListener('osu', temp);
@@ -726,7 +740,7 @@ $('#editorstop').click(function() {
 var keypresshandler = function(e) {
   e.preventDefault();
   var code = e.keyCode;
-  if (code == 32) {
+  if (code == 32 && source) {
     if (source.getPlaying()) source.pause();
     else source.play();
   }
