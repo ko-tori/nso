@@ -118,6 +118,7 @@ var gameLoop = function() {
   ctx.fillRect(0, 0, viewwidth, viewheight);
   ctx.translate(playtransform[1], playtransform[2]);
   ctx.scale(playtransform[0], playtransform[0]);
+  
   if (pt <= 0) pt = -(vars.leadin + new Date().getTime() - vars.startt) / 1000;
   for (var k = i2; k < ct; k++) {
     var td = objs[k].startTime / 1000 - pt;

@@ -137,75 +137,77 @@ var removeTimelineMark = function(time, type) {
   }
 };
 
-function createSound(buffer, context, loop) {
+var createSound = function(buffer, context, loop) {
   var sourceNode = null,
-    startedAt = 0,
-    pausedAt = 0,
-    playing = false,
+    startedat = 0, // beginning of audio in terms of the AudioContext when play() was last called
+    playing = false, // boolean
+    pausedat, // undefined if not paused, otherwise the offset at which it was paused
     gain;
 
-  var play = function(offset, loop, delay) {
+  var play = function(offset, delay) {
+    delay = delay || 0;
     if (sourceNode) sourceNode.stop();
     sourceNode = context.createBufferSource();
     var prevgainvalue = source.volume() || .5;
-    gain = audioCtx.createGain();
+    gain = context.createGain();
     gain.gain.value = prevgainvalue;
     sourceNode.connect(gain);
     gain.connect(context.destination);
-    sourceNode.loop = loop || false;
     sourceNode.buffer = buffer;
-    if (pausedAt > buffer.duration * .995) offset = 0;
-    else offset = offset || pausedAt;
-    startedAt = context.currentTime - offset;
-    sourceNode.start(delay || 0, offset);
-    pausedAt = false;
+    if(!offset){
+      if(!playing && pausedat !== undefined)
+        offset = pausedat;
+      else
+        offset = 0;
+    }
+    pausedat = undefined;
+    if(offset >= buffer.duration) offset = 0;
+    sourceNode.start(delay, offset);
+    startedat = context.currentTime - offset + delay;
     playing = true;
   };
-
-  var volume = function(x) {
-    if (x) gain.gain.value = x;
-    else return gain ? gain.gain.value : undefined;
-  };
-
-  var pause = function(position) {
-    var elapsed = context.currentTime - startedAt;
+  
+  var pause = function(offset){
+    pausedat = offset !== undefined ? offset : getCurrentTime();
     stop();
-    pausedAt = position || elapsed;
   };
-
+  
   var stop = function() {
     if (sourceNode) {
       sourceNode.disconnect();
       sourceNode.stop(0);
       sourceNode = null;
     }
-    pausedAt = 0;
-    startedAt = 0;
     playing = false;
   };
-
+  
   var getPlaying = function() {
     return playing;
   };
-
-  var getCurrentTime = function() {
-    if (pausedAt !== false) {
-      return pausedAt;
+  
+  var getCurrentTime = function(){
+    if(pausedat !== undefined)
+      return pausedat;
+    else{
+      if(playing)
+        return context.currentTime - startedat;
+      return 0;
     }
-    if (startedAt) {
-      return (context.currentTime - startedAt);
-    }
-    return 0;
   };
-
+  
   var getDuration = function() {
     return buffer.duration;
   };
-
-  var getInfo = function(){
-    return [pausedAt, startedAt];
+  
+  var volume = function(x) {
+    if (x) gain.gain.value = x;
+    else return gain ? gain.gain.value : undefined;
   };
-
+  
+  var getInfo = function(){
+    return pausedat;
+  };
+  
   return {
     getCurrentTime: getCurrentTime,
     getDuration: getDuration,
@@ -217,7 +219,7 @@ function createSound(buffer, context, loop) {
     volume: volume,
     getInfo: getInfo
   };
-}
+};
 
 var init = function(callback) {
   var breaks = beatmap['breakTimes'],
@@ -355,6 +357,7 @@ var coords2 = function(x, y) {
 var anim = function() {
   window.requestAnimationFrame(anim);
   var t = source !== undefined ? source.getCurrentTime() : 0;
+  console.log(t, source.getPlaying(), source.getInfo());
   var pct = t / (source !== undefined ? source.getDuration() : Infinity);
   var rounded = (pct * 100).toFixed(1);
   $('#time').html(new Date(t * 1000).toISOString().substr(14, 9).replace('.', ':'));
@@ -364,8 +367,8 @@ var anim = function() {
   $('#timelinebar').css({
     left: track.position().left + track.width() * pct
   });
-  if (pct > .9995) {
-    source.pause(source.getDuration() - .0001);
+  if (pct >= 1) {
+    source.pause(source.getDuration());
     if (loopsource)
       source.play(0);
   }
@@ -380,13 +383,17 @@ var anim = function() {
   $('#mousepos').html('x:'+ mx + ' y:' + my);
   //console.log(mousex,mousey);
   if (vars.sliders && beatmap && beatmap['hitObjects']) {
-    var canvas = document.getElementById('gridcanvas');
-    var ctx = canvas.getContext('2d');
+    var ctx = document.getElementById('gridcanvas').getContext('2d');
     ctx.save();
     ctx.clearRect(0, 0, $(window).width(), $(window).height());
-    
     ctx.translate(($(window).width() - width) / 2, $(window).height() * .16);
     ctx.scale(width / 512, height / 384);
+    
+    var ctx2 = document.getElementById('gridcanvas2').getContext('2d');
+    ctx2.save(); // save1
+    ctx2.clearRect(0, 0, $(window).width(), $(window).height());
+    ctx2.translate(($(window).width() - width) / 2, $(window).height() * .16);
+    ctx2.scale(width / 512, height / 384);
 
     var ar = ars(parseFloat(beatmap['ApproachRate']));
     var od = ods(parseFloat(beatmap['OverallDifficulty']));
@@ -417,10 +424,14 @@ var anim = function() {
         continue;
       else if (ot != 'spinner') {
         ctx.save(); // save 2
+        ctx2.save();
         var r;
         if (ot == 'slider' && sd[i]) {
           if (td > 0) ctx.globalAlpha = 2 - 2 * td / ar;
-          else ctx.globalAlpha = Math.max(1 - (t - endTime) / fadetime, 0);
+          else {
+            ctx.globalAlpha = Math.max(1 - (t - endTime) / fadetime, 0);
+            ctx2.globalAlpha = Math.max(1 - (t - endTime) / fadetime, 0);
+          }
           ctx.drawImage(sd[i][0], sd[i][1][0], sd[i][1][1], sd[i][0].width / 2, sd[i][0].height / 2);
           r = obj.repeatCount;
           
@@ -444,20 +455,20 @@ var anim = function() {
                 if(obj.duration / 1000 + td > 0){
                   var posx = p1[0] + distance / dpart * (p2[0] - p1[0]), posy = p1[1] + distance / dpart * (p2[1] - p1[1]);
                   var cs2 = cs * 11 / 12;
-                  ctx.save();
-                  ctx.translate(posx, posy);
-                  ctx.rotate(Math.atan2(p2[1]-p1[1],p2[0]-p1[0]) + (skinopts.SliderBallFlip==0 && dir==-1 ? Math.PI : 0));
-                  ctx.drawImage(skin['sliderb0' + col], - cs2 / 2, - cs2 / 2, cs2, cs2);
-                  ctx.restore();
+                  ctx2.save();
+                  ctx2.translate(posx, posy);
+                  ctx2.rotate(Math.atan2(p2[1]-p1[1],p2[0]-p1[0]) + (skinopts.SliderBallFlip==0 && dir==-1 ? Math.PI : 0));
+                  ctx2.drawImage(skin['sliderb0' + col], - cs2 / 2, - cs2 / 2, cs2, cs2);
+                  ctx2.restore();
                 }
                 else{
                   var temp = r%2 ? vars.sliderpoints[i].length - 1 : 0;
                   var posx = vars.sliderpoints[i][temp][0], posy = vars.sliderpoints[i][temp][1];
                 }
-                ctx.save();
+                ctx2.save();
                 var r_fs = td > -.1 ? cs*(1-td*10) : (td < -obj.duration / 1000 ? 2*cs+(td + obj.duration / 1000) * 5 * .5 * cs : 2*cs);
-                ctx.drawImage(skin['sliderfollowcircle'], posx - r_fs / 2, posy - r_fs / 2, r_fs, r_fs);
-                ctx.restore();
+                ctx2.drawImage(skin['sliderfollowcircle'], posx - r_fs / 2, posy - r_fs / 2, r_fs, r_fs);
+                ctx2.restore();
                 break;
               }
               else{
@@ -501,17 +512,18 @@ var anim = function() {
           drawNumber();
         }
         ctx.restore(); // restore 2
+        ctx2.restore();
       }
     }
     ctx.restore();
+    ctx2.restore();
   }
 };
 
 var aligngrid = function() {
   var height = $(window).height() * .75;
   var width = height * 4 / 3;
-  document.getElementById('gridcanvas').setAttribute('width', $(document).width());
-  document.getElementById('gridcanvas').setAttribute('height', $(document).height());
+  $('#centersection>canvas').attr('width', $(document).width()).attr('height', $(document).height());
   var img = $('#grid');
   img.css('left', ($(window).width() - width) / 2);
   img.css('top', $(window).height() * .16);
@@ -656,11 +668,13 @@ var timelinemove = function(e) {
   var w = track.width();
   var pct = Math.max(0, Math.min(mousex - track.position().left, w)) / w;
   var pos = pct * source.getDuration();
-  if (pct > .9995) source.pause(source.getDuration() - .01);
-  else if (source.getPlaying())
-    source.play(pos);
-  else
+  if (pct >= 1) source.pause(source.getDuration());
+  else {
+    var a = source.getPlaying();
     source.pause(pos);
+    if (a)
+      source.play(pos);
+  }
 };
 
 var mousedown = false;
@@ -733,7 +747,7 @@ $('#editorpause').click(function() {
 
 $('#editorstop').click(function() {
   if (source)
-    source.stop();
+    source.pause(0);
   controlclicked($(this));
 });
 
@@ -763,7 +777,7 @@ var wheelupdate = function(e) {
       / vars.beatsnapdivisor
       * (source.getPlaying() ? 2 : 1)
       * (e.shiftKey ? tpt.timingSignature : 1))));
-    if (pos > .9995 * source.getDuration()) source.pause(source.getDuration() - .1);
+    if (pos >= source.getDuration()) source.pause(source.getDuration());
     else if (source.getPlaying())
       source.play(pos);
     else

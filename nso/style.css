@@ -142,12 +142,20 @@ body {
     display: flex;
 }
 
-#gridcanvas {
+#centersection>canvas {
     position: absolute;
     top: 0;
     left: 0;
     margin: 0;
     padding: 0;
+}
+
+#gridcanvas2 {
+    z-index:-9;
+}
+
+#gridcanvas {
+    z-index:-10;
 }
 
 .gridtemp {
@@ -393,3 +401,4 @@ body {
     color: white;
     opacity: 1;
 }
+
