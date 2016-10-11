@@ -25,7 +25,11 @@ var vars = {
 var loadSkin = function(callback) {
   status = "Loading Skin... 0%";
   var numloaded = 0;
-  var elements = ['sliderb0', 'sliderfollowcircle', 'sliderstartcircle', 'sliderstartcircleoverlay', 'sliderendcircle', 'sliderendcircleoverlay', 'sliderscorepoint', 'cursor', 'cursortrail', 'hitcircle', 'hitcircleoverlay', 'approachcircle', 'default-0', 'default-1', 'default-2', 'default-3', 'default-4', 'default-5', 'default-6', 'default-7', 'default-8', 'default-9'];
+  var elements = ['sliderb0', 'sliderfollowcircle', 'sliderstartcircle', 'sliderstartcircleoverlay', 'sliderendcircle', 'sliderendcircleoverlay', 'sliderscorepoint',
+    'cursor', 'cursortrail', 'hitcircle', 'hitcircleoverlay', 'approachcircle',
+    'default-0', 'default-1', 'default-2', 'default-3', 'default-4', 'default-5', 'default-6', 'default-7', 'default-8', 'default-9',
+    'spinner-bottom', 'spinner-top', 'spinner-middle', 'spinner-middle2',
+  ];
   var loaded = function() {
     numloaded++;
     status = "Loading Skin... " + (85 * numloaded / elements.length).toFixed(2) + "%";
@@ -93,20 +97,19 @@ var renderslidersasync = function(si, delay, callback) {
   var cs = cspx(parseFloat(beatmap['CircleSize']));
   var rendernext = function() {
     var obj = beatmap.hitObjects[si[i]];
-    var border = skinopts.SliderBorder ? colorToArray(skinopts.SliderBorder) : [255, 255, 255];
-    var trackcolor = skinopts.SliderTrackOverride ? colorToArray(skinopts.SliderTrackOverride) : vars.cols[vars.objc[si[i]][0]];
     switch (obj.curveType) {
       case 'pass-through':
         vars.sliderpoints[si[i]] = passthrough(obj.points, obj.pixelLength);
-        vars.sliders[si[i]] = render_curve(vars.sliderpoints[si[i]], cs, trackcolor, border);
+        vars.sliders[si[i]] = render_curve2(vars.sliderpoints[si[i]], cs);
         break;
       case 'bezier':
         vars.sliderpoints[si[i]] = bezier(obj.points, obj.pixelLength);
-        vars.sliders[si[i]] = render_curve(vars.sliderpoints[si[i]], cs, trackcolor, border);
+        vars.sliderpoints[si[i]][vars.sliderpoints[si[i]].length - 1] = beatmap.hitObjects[si[i]].endPosition;
+        vars.sliders[si[i]] = render_curve2(vars.sliderpoints[si[i]], cs);
         break;
       case 'linear':
         vars.sliderpoints[si[i]] = line(obj.points, obj.pixelLength)[0];
-        vars.sliders[si[i]] = render_curve(vars.sliderpoints[si[i]], cs, trackcolor, border);
+        vars.sliders[si[i]] = render_curve2(vars.sliderpoints[si[i]], cs);
         break;
     }
     i++;
@@ -154,24 +157,24 @@ var createSound = function(buffer, context, loop) {
     sourceNode.connect(gain);
     gain.connect(context.destination);
     sourceNode.buffer = buffer;
-    if(!offset){
-      if(!playing && pausedat !== undefined)
+    if (!offset) {
+      if (!playing && pausedat !== undefined)
         offset = pausedat;
       else
         offset = 0;
     }
     pausedat = undefined;
-    if(offset >= buffer.duration) offset = 0;
+    if (offset >= buffer.duration) offset = 0;
     sourceNode.start(delay, offset);
     startedat = context.currentTime - offset + delay;
     playing = true;
   };
-  
-  var pause = function(offset){
+
+  var pause = function(offset) {
     pausedat = offset !== undefined ? offset : getCurrentTime();
     stop();
   };
-  
+
   var stop = function() {
     if (sourceNode) {
       sourceNode.disconnect();
@@ -180,34 +183,34 @@ var createSound = function(buffer, context, loop) {
     }
     playing = false;
   };
-  
+
   var getPlaying = function() {
     return playing;
   };
-  
-  var getCurrentTime = function(){
-    if(pausedat !== undefined)
+
+  var getCurrentTime = function() {
+    if (pausedat !== undefined)
       return pausedat;
-    else{
-      if(playing)
+    else {
+      if (playing)
         return context.currentTime - startedat;
       return 0;
     }
   };
-  
+
   var getDuration = function() {
     return buffer.duration;
   };
-  
+
   var volume = function(x) {
     if (x) gain.gain.value = x;
     else return gain ? gain.gain.value : undefined;
   };
-  
-  var getInfo = function(){
+
+  var getInfo = function() {
     return pausedat;
   };
-  
+
   return {
     getCurrentTime: getCurrentTime,
     getDuration: getDuration,
@@ -219,6 +222,22 @@ var createSound = function(buffer, context, loop) {
     volume: volume,
     getInfo: getInfo
   };
+};
+
+var addComboNumber = function(digits, n) {
+  return skin['default-' + n] = concatImages(digits, parseInt(skinopts.HitCircleOverlap || 2, 10));
+};
+
+var addComboColor = function(col) {
+  vars.cols.push(col);
+  var tintelements = ['hitcircle', 'approachcircle', 'sliderb0'];
+  for (var i = 0; i < tintelements.length; i++) {
+    if (tintelements[i] == 'sliderb0') {
+      skin[tintelements[i] + (vars.cols.length - 1)] = tint(skin[tintelements[i]], [0, 0, 0]);
+    }
+    else
+      skin[tintelements[i] + (vars.cols.length - 1)] = tint(skin[tintelements[i]], col);
+  }
 };
 
 var init = function(callback) {
@@ -263,7 +282,7 @@ var init = function(callback) {
       n++;
       j = 1;
     }
-    vars.objc.push([n % vars.cols.length, j]);
+    vars.objc.push([n, j]);
     j++;
 
     if (beatmap['hitObjects'][i].startTime >= beatmap['timingPoints'][tptn])
@@ -276,7 +295,7 @@ var init = function(callback) {
     for (j = 0; j < n2.length; j++) {
       digits.push(skin['default-' + n2.charAt(j)]);
     }
-    skin['default-' + n] = concatImages(digits, parseInt(skinopts.HitCircleOverlap || 2, 10));
+    addComboNumber(digits, n);
     n++;
   }
   var si = [];
@@ -290,8 +309,8 @@ var init = function(callback) {
   var tintelements = ['hitcircle', 'approachcircle', 'sliderb0'];
   for (i = 0; i < tintelements.length; i++) {
     for (j = 0; j < vars.cols.length; j++) {
-      if(tintelements[i] == 'sliderb0'){
-        skin[tintelements[i] + j] = tint(skin[tintelements[i]], '#000000');
+      if (tintelements[i] == 'sliderb0') {
+        skin[tintelements[i] + j] = tint(skin[tintelements[i]], [0, 0, 0]);
       }
       else
         skin[tintelements[i] + j] = tint(skin[tintelements[i]], vars.cols[j]);
@@ -341,7 +360,7 @@ var getIndexAt = function(t) {
 var getTimingPointAt = function(t) {
   for (var i = 0; i < beatmap['timingPoints'].length; i++) {
     var tpt = beatmap['timingPoints'][i];
-    if (tpt.offset/1000 > t) return beatmap['timingPoints'][Math.max(i - 1, 0)];
+    if (tpt.offset / 1000 > t) return beatmap['timingPoints'][Math.max(i - 1, 0)];
   }
   return beatmap['timingPoints'][Math.max(i - 1, 0)];
 }; //returns timing point at t
@@ -357,8 +376,7 @@ var coords2 = function(x, y) {
 var anim = function() {
   window.requestAnimationFrame(anim);
   var t = source !== undefined ? source.getCurrentTime() : 0;
-  console.log(t, source.getPlaying(), source.getInfo());
-  var pct = t / (source !== undefined ? source.getDuration() : Infinity);
+  var pct = source !== undefined ? t / source.getDuration() : 0;
   var rounded = (pct * 100).toFixed(1);
   $('#time').html(new Date(t * 1000).toISOString().substr(14, 9).replace('.', ':'));
   $('#progress').html((rounded > 100 ? 'outro' : rounded) + '%');
@@ -374,13 +392,8 @@ var anim = function() {
   }
   var height = $(window).height() * .75;
   var width = height * 4 / 3;
-  function r(n){
-    var d = vars.gridsnap ? vars.gridlevel : 1;
-    return Math.round(n/d)*d;
-  };
-  var mx = r((mousex - $('#grid').offset().left) / width * 512),
-    my = r((mousey - $('#grid').offset().top) / height * 384);
-  $('#mousepos').html('x:'+ mx + ' y:' + my);
+
+  $('#mousepos').html('x:' + mousex + ' y:' + mousey);
   //console.log(mousex,mousey);
   if (vars.sliders && beatmap && beatmap['hitObjects']) {
     var ctx = document.getElementById('gridcanvas').getContext('2d');
@@ -388,7 +401,7 @@ var anim = function() {
     ctx.clearRect(0, 0, $(window).width(), $(window).height());
     ctx.translate(($(window).width() - width) / 2, $(window).height() * .16);
     ctx.scale(width / 512, height / 384);
-    
+
     var ctx2 = document.getElementById('gridcanvas2').getContext('2d');
     ctx2.save(); // save1
     ctx2.clearRect(0, 0, $(window).width(), $(window).height());
@@ -408,17 +421,17 @@ var anim = function() {
     var renderFrom = getIndexAt(t - fadetime2 - vars.maxsliderdur);
     var renderTo = getIndexAt(t + ar);
 
-    for(var i = renderTo; i >= renderFrom; i--){
-      if(!vars.objc[i]) continue;
+    for (var i = renderTo; i >= renderFrom; i--) {
+      if (!vars.objc[i]) continue;
       var obj = objs[i];
       var ot = obj.objectName;
-      var col = vars.objc[i][0];
+      var col = vars.objc[i][0] % vars.cols.length;
       var offset = obj.startTime / 1000;
       var endTime = obj.endTime / 1000;
       var x = obj.position[0] - cs / 2,
         y = obj.position[1] - cs / 2;
       var td = offset - t;
-      
+
       if (endTime === undefined) endTime = offset;
       if (td > ar)
         continue;
@@ -432,46 +445,69 @@ var anim = function() {
             ctx.globalAlpha = Math.max(1 - (t - endTime) / fadetime, 0);
             ctx2.globalAlpha = Math.max(1 - (t - endTime) / fadetime, 0);
           }
-          ctx.drawImage(sd[i][0], sd[i][1][0], sd[i][1][1], sd[i][0].width / 2, sd[i][0].height / 2);
-          r = obj.repeatCount;
           
-          for(var p = 1; p < r; p++){
-            
+          if(sd[i][2][1] != vars.cols[col] || sd[i][2][0] != cs || sd[i][2][2]){
+            if(sd[i][2][0] != cs || !sd[i][2][3] || sd[i][2][2]){
+              vars.sliders[i] = render_curve2(vars.sliderpoints[i], cs);
+              sd = vars.sliders;
+            }
+            sd[i][2][1] = vars.cols[col];
+            var slider_border = skinopts.SliderBorder ? colorToArray(skinopts.SliderBorder) : undefined;
+            var slider_trackcolor = skinopts.SliderTrackOverride ? colorToArray(skinopts.SliderTrackOverride) : vars.cols[col];
+            sd[i][2][3] = document.createElement('canvas');
+            sd[i][2][3].width = sd[i][0][0].width;
+            sd[i][2][3].height = sd[i][0][0].height;
+            var tempctx = sd[i][2][3].getContext('2d');
+            tempctx.drawImage(tint(sd[i][0][0], slider_border), 0, 0);
+            tempctx.globalCompositeOperation = 'destination-out';
+            tempctx.drawImage(sd[i][0][1], 0, 0);
+            tempctx.globalCompositeOperation = 'source-over';
+            tempctx.globalAlpha = .75;
+            tempctx.drawImage(tint(sd[i][0][1], slider_trackcolor), 0, 0);
+            tempctx.drawImage(sd[i][0][2], 0, 0);
           }
-          if(td <= 0 && obj.duration / 1000 + td > -.2){
-            var prog = - td / obj.duration * 1000; // progress percentage (0-1)
+          ctx.drawImage(sd[i][2][3], sd[i][1][0], sd[i][1][1], sd[i][2][3].width / 2, sd[i][2][3].height / 2);
+          
+          r = obj.repeatCount;
+          for (var p = 1; p < r; p++) {
+            //repeat arrows/slider ends
+          }
+          if (td <= 0 && obj.duration / 1000 + td > -.2) {
+            var prog = -td / obj.duration * 1000; // progress percentage (0-1)
             var curp = prog * r; // current progress (equivalent to distance traveled divided by slider length)
             var dir = 1 - 2 * (Math.floor(curp) % 2); // direction the ball is traveling, 1 for normal, -1 for reverse
             var distance = curp % 1 * obj.pixelLength;
             var j = dir == 1 ? 0 : vars.sliderpoints[i].length - 1;
             var jend = dir == 1 ? vars.sliderpoints[i].length - 1 : 0;
-            while(j != jend){
+            while (j != jend) {
               var p1 = vars.sliderpoints[i][j];
-              var p2 = vars.sliderpoints[i][j+dir];
+              var p2 = vars.sliderpoints[i][j + dir];
               var dpart = dist(p1, p2);
-              if(dpart > distance){
+              if (dpart > distance) {
                 //without extra interpolation stuff
                 //ctx.drawImage(skin['sliderb0'], p1[0] - cs / 2, p1[1] - cs / 2, cs, cs);
-                if(obj.duration / 1000 + td > 0){
-                  var posx = p1[0] + distance / dpart * (p2[0] - p1[0]), posy = p1[1] + distance / dpart * (p2[1] - p1[1]);
+                if (obj.duration / 1000 + td > 0) {
+                  var posx = p1[0] + distance / dpart * (p2[0] - p1[0]),
+                    posy = p1[1] + distance / dpart * (p2[1] - p1[1]);
                   var cs2 = cs * 11 / 12;
                   ctx2.save();
                   ctx2.translate(posx, posy);
-                  ctx2.rotate(Math.atan2(p2[1]-p1[1],p2[0]-p1[0]) + (skinopts.SliderBallFlip==0 && dir==-1 ? Math.PI : 0));
-                  ctx2.drawImage(skin['sliderb0' + col], - cs2 / 2, - cs2 / 2, cs2, cs2);
+                  ctx2.rotate(Math.atan2(p2[1] - p1[1], p2[0] - p1[0]) + (skinopts.SliderBallFlip == 0 && dir == -1 ? Math.PI : 0));
+                  ctx2.drawImage(skin['sliderb0' + col], -cs2 / 2, -cs2 / 2, cs2, cs2);
                   ctx2.restore();
                 }
-                else{
-                  var temp = r%2 ? vars.sliderpoints[i].length - 1 : 0;
-                  var posx = vars.sliderpoints[i][temp][0], posy = vars.sliderpoints[i][temp][1];
+                else {
+                  var temp = r % 2 ? vars.sliderpoints[i].length - 1 : 0;
+                  var posx = vars.sliderpoints[i][temp][0],
+                    posy = vars.sliderpoints[i][temp][1];
                 }
                 ctx2.save();
-                var r_fs = td > -.1 ? cs*(1-td*10) : (td < -obj.duration / 1000 ? 2*cs+(td + obj.duration / 1000) * 5 * .5 * cs : 2*cs);
+                var r_fs = td > -.1 ? cs * (1 - td * 10) : (td < -obj.duration / 1000 ? 2 * cs + (td + obj.duration / 1000) * 5 * .5 * cs : 2 * cs);
                 ctx2.drawImage(skin['sliderfollowcircle'], posx - r_fs / 2, posy - r_fs / 2, r_fs, r_fs);
                 ctx2.restore();
                 break;
               }
-              else{
+              else {
                 distance -= dpart;
               }
               j += dir;
@@ -480,25 +516,25 @@ var anim = function() {
         }
         if (td > 0) {
           ctx.globalAlpha = 2 - 2 * td / ar;
-          var r_as = cs * (2 * td / ar + 1);
+          var r_as = cs * (2.5 * td / ar + 1);
           //console.log(skin['approachcircle' + col],skin['hitcircle' + col]);
           ctx.drawImage(skin['approachcircle' + col], x + cs / 2 - r_as / 2, y + cs / 2 - r_as / 2, r_as, r_as);
           ctx.drawImage(skin['hitcircle' + col], x, y, cs, cs);
         }
         else {
           ctx.globalAlpha = Math.max(1 + td / fadetime2, 0);
-          var r_as = cs * Math.min(-td / ar + 1, 13/12);
+          var r_as = cs * Math.min(-td / ar + 1, 13 / 12);
           ctx.drawImage(skin['approachcircle' + col], x + cs / 2 - r_as / 2, y + cs / 2 - r_as / 2, r_as, r_as);
           ctx.drawImage(skin['hitcircle'], x, y, cs, cs);
         }
-        
+
         var drawOverlay = function() {
           ctx.drawImage(skin.hitcircleoverlay, x, y, cs, cs);
         };
         var drawNumber = function() {
           if (td > 0) {
             var num = skin['default-' + vars.objc[i][1]];
-            var newh = num.height/skin['hitcircle'].height*cs*3/4;
+            var newh = num.height / skin['hitcircle'].height * cs * 3 / 4;
             var dh = newh / num.height;
             ctx.drawImage(num, x - num.width * dh / 2 + cs / 2, y - newh / 2 + cs / 2, num.width * dh, newh);
           }
@@ -513,6 +549,35 @@ var anim = function() {
         }
         ctx.restore(); // restore 2
         ctx2.restore();
+      }
+      else {
+        ctx.save();
+        ctx.globalCompositeOperation = "destination-over";
+        ctx.translate(256, 192);
+        var dur = (obj.endTime - obj.startTime) / 1000;
+        var td = obj.startTime / 1000 - t;
+        //if(obj.objectName=="spinner") console.log(td);
+        var drawspinner = function(r, a, t, middle) {
+          ctx.globalAlpha = a;
+          if (!middle) middle = skin['spinner-middle'];
+          ctx.drawImage(middle, -r * 1.01, -r * 1.01, 2.02 * r, 2.02 * r);
+          ctx.drawImage(skin['spinner-middle2'], -r * .025, -r * .025, 2 * r * .025, 2 * r * .025);
+          ctx.save();
+          ctx.rotate(t * 4 * Math.PI);
+          ctx.drawImage(skin['spinner-top'], -r, -r, 2 * r, 2 * r);
+          ctx.restore();
+          ctx.drawImage(skin['spinner-bottom'], -r, -r, 2 * r, 2 * r);
+        };
+        if (td < 0 && -td < dur) {
+          drawspinner(172 + 40 * Math.sqrt(-td / dur), 1, td, tint(skin['spinner-middle'], [255, 255 * (1 + td / dur), 255 * (1 + td / dur)]));
+        }
+        else if (td > 0 && td < .4) {
+          drawspinner(172, 1 - td / .4, 0);
+        }
+        else if (td < 0 && -td < dur + .25) {
+          drawspinner(212, 1 + (dur + td) / .25, dur);
+        }
+        ctx.restore();
       }
     }
     ctx.restore();
@@ -564,7 +629,7 @@ loadSkin(function() {
         $("#fileuploadpanel").slideDown();
       });
       $("#cover").click(function() {
-        if(!loading){
+        if (!loading) {
           $("#cover").fadeOut();
           $("#fileuploadpanel").slideUp();
         }
@@ -660,13 +725,15 @@ loadSkin(function() {
 });
 
 var mousex = 0,
-  mousey = 0;
+  mousey = 0,
+  gmousex = 0,
+  gmousey = 0;
 
 var timelinemove = function(e) {
   if (!source) return
   var track = $('#timelinetrack');
   var w = track.width();
-  var pct = Math.max(0, Math.min(mousex - track.position().left, w)) / w;
+  var pct = Math.max(0, Math.min(gmousex - track.position().left, w)) / w;
   var pos = pct * source.getDuration();
   if (pct >= 1) source.pause(source.getDuration());
   else {
@@ -772,11 +839,11 @@ var wheelupdate = function(e) {
   else if (source && beatmap) {
     var tpt = getTimingPointAt(source.getCurrentTime());
     var pos = Math.min(source.getDuration(),
-      Math.max(0, source.getCurrentTime() - ((e.wheelDelta || -e.detail) / 120 
-      * tpt.beatLength / 1000
-      / vars.beatsnapdivisor
-      * (source.getPlaying() ? 2 : 1)
-      * (e.shiftKey ? tpt.timingSignature : 1))));
+      Math.max(0, source.getCurrentTime() - ((e.wheelDelta || -e.detail) / 120 *
+        tpt.beatLength / 1000 /
+        vars.beatsnapdivisor *
+        (source.getPlaying() ? 2 : 1) *
+        (e.shiftKey ? tpt.timingSignature : 1))));
     if (pos >= source.getDuration()) source.pause(source.getDuration());
     else if (source.getPlaying())
       source.play(pos);
@@ -786,8 +853,17 @@ var wheelupdate = function(e) {
 };
 
 var captureMouseLocation = function(e) {
-  mousex = e.pageX;
-  mousey = e.pageY;
+  var height = $(window).height() * .75;
+  var width = height * 4 / 3;
+
+  function r(n) {
+    var d = vars.gridsnap ? vars.gridlevel : 1;
+    return Math.round(n / d) * d;
+  }
+  gmousex = e.pageX;
+  gmousey = e.pageY;
+  mousex = r((e.pageX - $('#grid').offset().left) / width * 512),
+    mousey = r((e.pageY - $('#grid').offset().top) / height * 384);
 };
 
 $(window).on('resize', function() {

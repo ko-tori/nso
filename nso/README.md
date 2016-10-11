@@ -14,7 +14,8 @@ Making osu! in js because all the other attempts i've seen are horrible.
 - sync updates with server, eventually push updates to other clients
 
 ## Editor Log:
-- 9/10: Started Log. Basic map loading and animation done.
+- rewrote slider rendering again, separated into 3 elements
+- Basic map loading and animation done. Moved all utility functions to nsoutils.js
 
 ## Log:
 

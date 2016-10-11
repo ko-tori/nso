@@ -35,6 +35,7 @@ var concatImages = function(arr, overlap) {
 };
 
 var tint = function(img, col) {
+  if(col == undefined) return img;
   var canvas = document.createElement('canvas');
   canvas.height = img.height;
   canvas.width = img.width;
@@ -150,7 +151,7 @@ var lenp = function(p) {
 
 var bezier2 = function(p, l) {
   if (l === undefined) l = lenp(p);
-  var prec = l / 25;
+  var prec = l / 40;
   var n = p.length - 1;
 
   function b(t) {
@@ -184,22 +185,20 @@ var bezier2 = function(p, l) {
   return [arr, l1];
 };
 
-var line = function(p, l, step) {
-  if (l === undefined) l = -1;
-  if (step === undefined) step = 10;
+var line = function(p, l) {
+  // if (l === undefined) l = -1;
+  // if (step === undefined) step = 10;
   var dx = p[1][0] - p[0][0],
     dy = p[1][1] - p[0][1];
-  var m = pow(pow(dx, 2) + pow(dy, 2), .5) / step;
-  if (l == -1) l = m * step;
+  var m = pow(pow(dx, 2) + pow(dy, 2), .5);
+  if (l == undefined) l = m;
   dx /= m;
   dy /= m;
-  var a = [];
-  for (var i = 0; i < Math.round(l / step); i++) {
-    a.push([p[0][0] + dx * i, p[0][1] + dy * i]);
-  }
-  return [a.concat([
-    [p[0][0] + dx * l / step, p[0][1] + dy * l / step]
-  ]), l];
+  // var a = [];
+  // for (var i = 0; i < Math.round(l / step); i++) {
+  //   a.push([p[0][0] + dx * i, p[0][1] + dy * i]);
+  // }
+  return [[[p[0][0], p[0][1]], [p[0][0] + dx * l, p[0][1] + dy * l]], l];
 };
 
 var bezier = function(p, l) {
@@ -210,7 +209,7 @@ var bezier = function(p, l) {
   for (var i = 1; i < p.length + 1; i++) {
     if (i == p.length) {
       part = p.slice(prev, i);
-      c = part.length == 2 ? line(part, l) : bezier2(part, l);
+      c = bezier2(part, l);
       arr = arr.concat(c[0]);
     }
     else if (i < p.length && p[i].equals(p[i - 1])) {
@@ -327,4 +326,92 @@ var render_curve = function(p, cs, c1, c2) {
   ctx2.globalAlpha = .75;
   ctx2.drawImage(canvas,0,0);
   return [canvas2, [minx / 2 - cs / 4, miny / 2 - cs / 4]];
+};
+
+// p: array of points
+// cs: circle size
+// c1: border color
+// returns: [[border, body, overlay], [positionx, positiony]]
+var render_curve2 = function(p, cs) {
+  var csi = cs;
+  if (cs === undefined) cs = 72 * 2;
+  var k = 2.5;
+  cs *= 22 / 12;
+  var x = [],
+    y = [];
+  for (var i = 0; i < p.length; i++) {
+    x.push(p[i][0] * 2);
+    y.push(p[i][1] * 2);
+  }
+  var minx = min(x),
+    miny = min(y),
+    maxx = max(x),
+    maxy = max(y);
+  var w = maxx - minx,
+    h = maxy - miny;
+  // for(var i = 0; i < y.length; i++){
+  //   y[i] -= h;
+  // }
+  var overlay = document.createElement('canvas');
+  overlay.width = Math.ceil(w + cs);
+  overlay.height = Math.ceil(h + cs);
+  var ctx = overlay.getContext('2d');
+  var border = document.createElement('canvas');
+  border.width = Math.ceil(w + cs);
+  border.height = Math.ceil(h + cs);
+  var ctx2 = border.getContext('2d');
+  var body = document.createElement('canvas');
+  body.width = Math.ceil(w + cs);
+  body.height = Math.ceil(h + cs);
+  var ctx3 = body.getContext('2d');
+  var a = 0;
+  ctx.beginPath();
+  ctx2.beginPath();
+  ctx3.beginPath();
+  ctx.lineCap = ctx2.lineCap = 'round';
+  ctx.lineJoin = ctx2.lineJoin = 'round';
+  ctx2.lineCap = ctx2.lineCap = 'round';
+  ctx2.lineJoin = ctx2.lineJoin = 'round';
+  ctx3.lineCap = ctx2.lineCap = 'round';
+  ctx3.lineJoin = ctx2.lineJoin = 'round';
+  ctx.moveTo(x[0] - minx + cs / 2, y[0] - miny + cs / 2);
+  ctx2.moveTo(x[0] - minx + cs / 2, y[0] - miny + cs / 2);
+  ctx3.moveTo(x[0] - minx + cs / 2, y[0] - miny + cs / 2);
+  for (i = 1; i < p.length; i++) {
+    ctx.lineTo(x[i] - minx + cs / 2, y[i] - miny + cs / 2);
+    ctx2.lineTo(x[i] - minx + cs / 2, y[i] - miny + cs / 2);
+    ctx3.lineTo(x[i] - minx + cs / 2, y[i] - miny + cs / 2);
+  }
+  i = 0;
+  while (a < cs / k) {
+    ctx.lineWidth = ctx2.lineWidth = ctx3.lineWidth = cs - a * k;
+    if (i == 0) {
+      ctx2.strokeStyle = '#FFF';
+      a += cs / 10 / k;
+      ctx2.stroke();
+    }
+    else {
+      var c = a / cs * k / 8;
+      ctx.globalAlpha = c;
+      ctx.strokeStyle = '#FFF';
+      a += k;
+      ctx.stroke();
+      if (i == 1) {
+        ctx3.fillStyle = '#FFF';
+        ctx3.fillRect(0, 0, body.width, body.height);
+        ctx3.globalCompositeOperation = 'destination-in';
+        ctx3.stroke();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    i++;
+  }
+  ctx.globalCompositeOperation = 'copy';
+  ctx.globalAlpha = .5;
+  ctx.drawImage(overlay, 0, 0);
+  return [
+    [border, body, overlay],
+    [minx / 2 - cs / 4, miny / 2 - cs / 4],
+    [csi, [255, 255, 255], 0, 0]
+  ];
 };

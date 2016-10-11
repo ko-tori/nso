@@ -10,12 +10,12 @@ var ods = function(n) {
   return [.0795 - .006 * n, .1395 - .008 * n, .1995 - .01 * n];
 };
 
-var e = function(img){ // check if image is empty
+var e = function(img) { // check if image is empty
   return img.width == 0 && img.height == 0;
 };
 
 var concatImages = function(arr, overlap) {
-  if(!overlap) overlap = 0;
+  if (!overlap) overlap = 0;
   var canvas = document.createElement('canvas');
   var maxh = arr[0].height,
     w = arr[0].width;
@@ -250,7 +250,6 @@ var passthrough = function(p, l, step) {
     x = (m1 * x1 - m2 * x2 - y1 + y2) / (m1 - m2);
     y = m1 * (x - x1) + y1;
   }
-
   var r = dist([x, y], a),
     t = l / r,
     t1 = Math.atan2(a[1] - y, a[0] - x),
@@ -266,10 +265,12 @@ var passthrough = function(p, l, step) {
   return p;
 };
 
-var render_curve = function(p, cs, c1, c2) {
+// p: array of points
+// cs: circle size
+// c1: border color
+// returns: [[border, body, overlay], [positionx, positiony]]
+var render_curve = function(p, cs) {
   if (cs === undefined) cs = 72 * 2;
-  if (c1 === undefined) c1 = [0, 0, 0];
-  if (c2 === undefined) c2 = [1, 1, 1];
   var k = 2.5;
   cs *= 22 / 12;
   var x = [],
@@ -287,45 +288,65 @@ var render_curve = function(p, cs, c1, c2) {
   // for(var i = 0; i < y.length; i++){
   //   y[i] -= h;
   // }
-  var canvas = document.createElement('canvas');
-  canvas.width = Math.ceil(w + cs);
-  canvas.height = Math.ceil(h + cs);
-  var ctx = canvas.getContext('2d');
-  var canvas2 = document.createElement('canvas');
-  canvas2.width = Math.ceil(w + cs);
-  canvas2.height = Math.ceil(h + cs);
-  var ctx2 = canvas2.getContext('2d');
+  var overlay = document.createElement('canvas');
+  overlay.width = Math.ceil(w + cs);
+  overlay.height = Math.ceil(h + cs);
+  var ctx = overlay.getContext('2d');
+  var border = document.createElement('canvas');
+  border.width = Math.ceil(w + cs);
+  border.height = Math.ceil(h + cs);
+  var ctx2 = border.getContext('2d');
+  var body = document.createElement('canvas');
+  body.width = Math.ceil(w + cs);
+  body.height = Math.ceil(h + cs);
+  var ctx3 = body.getContext('2d');
   var a = 0;
   ctx.beginPath();
   ctx2.beginPath();
+  ctx3.beginPath();
   ctx.lineCap = ctx2.lineCap = 'round';
   ctx.lineJoin = ctx2.lineJoin = 'round';
+  ctx2.lineCap = ctx2.lineCap = 'round';
+  ctx2.lineJoin = ctx2.lineJoin = 'round';
+  ctx3.lineCap = ctx2.lineCap = 'round';
+  ctx3.lineJoin = ctx2.lineJoin = 'round';
   ctx.moveTo(x[0] - minx + cs / 2, y[0] - miny + cs / 2);
   ctx2.moveTo(x[0] - minx + cs / 2, y[0] - miny + cs / 2);
-  for (i = 1; i < p.length; i++){
+  ctx3.moveTo(x[0] - minx + cs / 2, y[0] - miny + cs / 2);
+  for (i = 1; i < p.length; i++) {
     ctx.lineTo(x[i] - minx + cs / 2, y[i] - miny + cs / 2);
     ctx2.lineTo(x[i] - minx + cs / 2, y[i] - miny + cs / 2);
+    ctx3.lineTo(x[i] - minx + cs / 2, y[i] - miny + cs / 2);
   }
-  i=0;
+  i = 0;
   while (a < cs / k) {
-    ctx.lineWidth = ctx2.lineWidth = cs - a * k;
+    ctx.lineWidth = ctx2.lineWidth = ctx3.lineWidth = cs - a * k;
     if (i == 0) {
-      ctx2.strokeStyle = toRGB(c2);
+      ctx2.strokeStyle = '#FFF';
       a += cs / 10 / k;
       ctx2.stroke();
     }
     else {
-      var c = a / cs * k / 4 * 255;
-      ctx.strokeStyle = toRGB([c1[0] + c, c1[1] + c, c1[2] + c]);
+      var c = a / cs * k / 8;
+      ctx.globalAlpha = c;
+      ctx.strokeStyle = '#FFF';
       a += k;
       ctx.stroke();
-      ctx2.globalCompositeOperation = 'destination-out';
-      ctx2.stroke();
-      ctx2.globalCompositeOperation = 'source-over';
+      if (i == 1) {
+        ctx3.fillStyle = '#FFF';
+        ctx3.fillRect(0, 0, body.width, body.height);
+        ctx3.globalCompositeOperation = 'destination-in';
+        ctx3.stroke();
+      }
+      ctx.globalCompositeOperation = 'source-over';
     }
     i++;
   }
-  ctx2.globalAlpha = .75;
-  ctx2.drawImage(canvas,0,0);
-  return [canvas2, [minx / 2 - cs / 4, miny / 2 - cs / 4]];
+  ctx.globalCompositeOperation = 'copy';
+  ctx.globalAlpha = .5;
+  ctx.drawImage(overlay, 0, 0);
+  return [
+    [border, body, overlay],
+    [minx / 2 - cs / 4, miny / 2 - cs / 4]
+  ];
 };
