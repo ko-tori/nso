@@ -27,6 +27,9 @@ var vars = {
   ncopt: false
 };
 
+//debug vars
+var keycodedbg = true;
+
 var loadSkin = function(callback) {
   status = "Loading Skin... 0%";
   var numloaded = 0;
@@ -574,7 +577,8 @@ var anim = function() {
           ctx.drawImage(skin['spinner-bottom'], -r, -r, 2 * r, 2 * r);
         };
         if (td < 0 && -td < dur) {
-          drawspinner(172 + 40 * Math.sqrt(-td / dur), 1, td, tint(skin['spinner-middle'], [255, 255 * (1 + td / dur), 255 * (1 + td / dur)]));
+          //drawspinner(172 + 40 * Math.sqrt(-td / dur), 1, td, tint(skin['spinner-middle'], [255, 255 * (1 + td / dur), 255 * (1 + td / dur)]));
+          drawspinner(172 + 40 * Math.sqrt(-td / dur), 1, td, skin['spinner-middle']);
         }
         else if (td > 0 && td < .4) {
           drawspinner(172, 1 - td / .4, 0);
@@ -864,7 +868,7 @@ var shiftalt = [false, false];
 var keypresshandler = function(e) {
   e.preventDefault();
   var code = (window.event) ? event.keyCode : e.keyCode;
-  console.log("keycode: ", code);
+  if(keycodedbg) console.log("keycode: ", code);
   if (!shiftalt[0] && code == 16) {
     shiftalt[0] = true;
     $('#draw_beatsnap').toggleClass('button_selected');

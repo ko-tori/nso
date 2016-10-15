@@ -16,6 +16,12 @@ body {
     background-color: #000;
 }
 
+img {
+    -webkit-user-drag: none;
+    user-drag: none;
+    -webkit-touch-callout: none;
+}
+
 #container {
     z-index: -1;
     top: 24px;
@@ -120,17 +126,17 @@ body {
     top: 0px;
     width: 100%;
     height: 15%;
-    z-index:5;
+    z-index: 5;
     background-color: rgba(0, 0, 0, .5);
     position: absolute;
 }
 
-#mousepos{
+#mousepos {
     font-family: "Century Gothic";
     text-shadow: 0 0 2px #fff;
     color: white;
-    padding:10px;
-    float:right;
+    padding: 10px;
+    float: right;
 }
 
 #bottomsection {
@@ -151,11 +157,11 @@ body {
 }
 
 #gridcanvas2 {
-    z-index:-9;
+    z-index: -9;
 }
 
 #gridcanvas {
-    z-index:-10;
+    z-index: -10;
 }
 
 .gridtemp {
@@ -168,9 +174,6 @@ body {
     position: absolute;
     height: 76vmin;
     width: auto;
-    -webkit-user-drag: none;
-    user-drag: none;
-    -webkit-touch-callout: none;
     opacity: .67;
     z-index: 1;
 }
@@ -403,39 +406,39 @@ body {
 }
 
 #lefttoolbar {
-    position:absolute;
-    top:33%;
-    height:44%;
+    position: absolute;
+    top: 33%;
+    height: 44%;
 }
 
-#lefttoolbar img{
-    display:block;
-    height:25%;
+#lefttoolbar img {
+    display: block;
+    height: 25%;
     padding-bottom: 10%;
-    width:auto;
-    opacity:.33;
+    width: auto;
+    opacity: .33;
     transition: opacity .1s linear;
 }
 
 #righttoolbar {
-    position:absolute;
-    right:0px;
+    position: absolute;
+    right: 0px;
 }
 
-#righttoolbar img{
-    display:block;
-    opacity:.33;
+#righttoolbar img {
+    display: block;
+    opacity: .33;
     transition: opacity .1s linear;
 }
 
-#draw_distsnap{
+#draw_distsnap {
     padding: 10% 0 10%;
 }
 
-#draw_newcombo{
+#draw_newcombo {
     padding-bottom: 10%;
 }
 
-.button_selected{
+.button_selected {
     opacity: 1 !important;
 }
