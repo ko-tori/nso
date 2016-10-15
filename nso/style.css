@@ -402,3 +402,40 @@ body {
     opacity: 1;
 }
 
+#lefttoolbar {
+    position:absolute;
+    top:33%;
+    height:44%;
+}
+
+#lefttoolbar img{
+    display:block;
+    height:25%;
+    padding-bottom: 10%;
+    width:auto;
+    opacity:.33;
+    transition: opacity .1s linear;
+}
+
+#righttoolbar {
+    position:absolute;
+    right:0px;
+}
+
+#righttoolbar img{
+    display:block;
+    opacity:.33;
+    transition: opacity .1s linear;
+}
+
+#draw_distsnap{
+    padding: 10% 0 10%;
+}
+
+#draw_newcombo{
+    padding-bottom: 10%;
+}
+
+.button_selected{
+    opacity: 1 !important;
+}

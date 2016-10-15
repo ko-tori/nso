@@ -17,9 +17,14 @@ var laststatus = 'Loading...',
   ignoreSkinColors = false;
 var vars = {
   beatsnapdivisor: 4,
-  distancesnap: 1,
+  distancespacing: 1,
+  distancesnap: true,
   gridlevel: 4,
-  gridsnap: true
+  gridsnap: true,
+  locknotes: false,
+  tool: 0, //0-3 for select, circle, slider, and spinner
+  soundopts: [false, false, false], //whistle, finish, clap
+  ncopt: false
 };
 
 var loadSkin = function(callback) {
@@ -445,9 +450,9 @@ var anim = function() {
             ctx.globalAlpha = Math.max(1 - (t - endTime) / fadetime, 0);
             ctx2.globalAlpha = Math.max(1 - (t - endTime) / fadetime, 0);
           }
-          
-          if(sd[i][2][1] != vars.cols[col] || sd[i][2][0] != cs || sd[i][2][2]){
-            if(sd[i][2][0] != cs || !sd[i][2][3] || sd[i][2][2]){
+
+          if (sd[i][2][1] != vars.cols[col] || sd[i][2][0] != cs || sd[i][2][2]) {
+            if (sd[i][2][0] != cs || !sd[i][2][3] || sd[i][2][2]) {
               vars.sliders[i] = render_curve2(vars.sliderpoints[i], cs);
               sd = vars.sliders;
             }
@@ -467,7 +472,7 @@ var anim = function() {
             tempctx.drawImage(sd[i][0][2], 0, 0);
           }
           ctx.drawImage(sd[i][2][3], sd[i][1][0], sd[i][1][1], sd[i][2][3].width / 2, sd[i][2][3].height / 2);
-          
+
           r = obj.repeatCount;
           for (var p = 1; p < r; p++) {
             //repeat arrows/slider ends
@@ -585,7 +590,7 @@ var anim = function() {
   }
 };
 
-var aligngrid = function() {
+var alignstuff = function() {
   var height = $(window).height() * .75;
   var width = height * 4 / 3;
   $('#centersection>canvas').attr('width', $(document).width()).attr('height', $(document).height());
@@ -594,12 +599,16 @@ var aligngrid = function() {
   img.css('top', $(window).height() * .16);
   img.css('width', width);
   img.css('height', height);
+  $('#righttoolbar>img').width($('#lefttoolbar>img')[0].width);
+  $('#righttoolbar').css('top', 14 + (1 - $('#righttoolbar').height() / ($('#container').height() - $('#topsection').height() - $('#bottomsection').height())) * 50 + '%');
 };
+
+alignstuff();
+$('#grid').removeClass('gridtemp');
 
 loadSkin(function() {
   window.requestAnimationFrame(anim);
-  aligngrid();
-  $('#grid').removeClass('gridtemp');
+  alignstuff();
   var socket = io.connect('/');
 
   socket.on('news', function(data) {
@@ -818,16 +827,119 @@ $('#editorstop').click(function() {
   controlclicked($(this));
 });
 
+$('#righttoolbar img').click(function() {
+  $(this).toggleClass('button_selected');
+  switch (this.id) {
+    case 'draw_newcombo':
+      vars.ncopt = !vars.ncopt;
+      break;
+    case 'sound_whistle':
+      vars.soundopts[0] = !vars.soundopts[0];
+      break;
+    case 'sound_finish':
+      vars.soundopts[1] = !vars.soundopts[1];
+      break;
+    case 'sound_clap':
+      vars.soundopts[2] = !vars.soundopts[2];
+      break;
+    case 'draw_beatsnap':
+      vars.gridsnap = !vars.gridsnap;
+      updateMouseLocation();
+      break;
+    case 'draw_distsnap':
+      vars.distancesnap = !vars.distancesnap;
+      break;
+  }
+
+});
+
+$('#lefttoolbar img').click(function() {
+  $('#lefttoolbar img').removeClass('button_selected');
+  $(this).addClass('button_selected');
+  vars.tool = $(this).index();
+});
+
+var shiftalt = [false, false];
+
 var keypresshandler = function(e) {
   e.preventDefault();
-  var code = e.keyCode;
-  if (code == 32 && source) {
+  var code = (window.event) ? event.keyCode : e.keyCode;
+  console.log("keycode: ", code);
+  if (!shiftalt[0] && code == 16) {
+    shiftalt[0] = true;
+    $('#draw_beatsnap').toggleClass('button_selected');
+    vars.gridsnap = !vars.gridsnap;
+    updateMouseLocation();
+  }
+  if (!shiftalt[1] && code == 18) {
+    shiftalt[1] = true;
+    $('#draw_distsnap').toggleClass('button_selected');
+    vars.distancesnap = !vars.distancesnap;
+  }
+  if (code == 32 && source) { //space
     if (source.getPlaying()) source.pause();
     else source.play();
   }
+  else if (code == 49) { //1
+    $('#lefttoolbar img').removeClass('button_selected');
+    $('#draw_select').addClass('button_selected');
+    vars.tool = 0;
+  }
+  else if (code == 50) { //2
+    $('#lefttoolbar img').removeClass('button_selected');
+    $('#draw_normal').addClass('button_selected');
+    vars.tool = 1;
+  }
+  else if (code == 51) { //3
+    $('#lefttoolbar img').removeClass('button_selected');
+    $('#draw_slider').addClass('button_selected');
+    vars.tool = 2;
+  }
+  else if (code == 52) { //4
+    $('#lefttoolbar img').removeClass('button_selected');
+    $('#draw_spinner').addClass('button_selected');
+    vars.tool = 3;
+  }
+  else if (code == 81) { //q
+    $('#draw_newcombo').toggleClass('button_selected');
+    vars.ncopt = !vars.ncopt;
+  }
+  else if (code == 87) { //w
+    $('#sound_whistle').toggleClass('button_selected');
+    vars.soundopts[0] = !vars.soundopts[0];
+  }
+  else if (code == 69) { //e
+    $('#sound_finish').toggleClass('button_selected');
+    vars.soundopts[1] = !vars.soundopts[1];
+  }
+  else if (code == 82) { //r
+    $('#sound_clap').toggleClass('button_selected');
+    vars.soundopts[2] = !vars.soundopts[2];
+  }
+  else if (code == 76) { //l
+    $('#draw_lock').toggleClass('button_selected');
+    vars.locknotes = !vars.locknotes;
+  }
 };
 
-document.addEventListener('keypress', keypresshandler, false);
+var keyuphandler = function(e) {
+  e.preventDefault();
+  var code = (window.event) ? event.keyCode : e.keyCode;
+  if (code == 16) {
+    shiftalt[0] = false;
+    $('#draw_beatsnap').toggleClass('button_selected');
+    vars.gridsnap = !vars.gridsnap;
+    updateMouseLocation();
+  }
+  if (code == 18) {
+    shiftalt[1] = false;
+    $('#draw_distsnap').toggleClass('button_selected');
+    vars.distancesnap = !vars.distancesnap;
+  }
+};
+
+document.addEventListener('keydown', keypresshandler, false);
+document.addEventListener('keyup', keyuphandler, false);
 
 var wheelupdate = function(e) {
   var t = $('#grid');
@@ -852,22 +964,25 @@ var wheelupdate = function(e) {
   }
 };
 
-var captureMouseLocation = function(e) {
-  var height = $(window).height() * .75;
-  var width = height * 4 / 3;
-
+var updateMouseLocation = function() {
   function r(n) {
     var d = vars.gridsnap ? vars.gridlevel : 1;
     return Math.round(n / d) * d;
   }
+  var height = $(window).height() * .75;
+  var width = height * 4 / 3;
+  mousex = r((gmousex - $('#grid').offset().left) / width * 512);
+  mousey = r((gmousey - $('#grid').offset().top) / height * 384);
+};
+
+var captureMouseLocation = function(e) {
   gmousex = e.pageX;
   gmousey = e.pageY;
-  mousex = r((e.pageX - $('#grid').offset().left) / width * 512),
-    mousey = r((e.pageY - $('#grid').offset().top) / height * 384);
+  updateMouseLocation();
 };
 
 $(window).on('resize', function() {
-  aligngrid();
+  alignstuff();
   if (source) {
     var track = $('#timelinetrack');
     for (var time in timelinemarks) {
@@ -891,4 +1006,10 @@ document.addEventListener("mousewheel", wheelupdate, {
 document.addEventListener("contextmenu", function(e) {
   e.preventDefault();
   console.log('rightclick! :o');
+  var o = (e.srcElement || e.originalTarget);
+  if (o.matches('#righttoolbar img, #lefttoolbar img, #timeline1c, #playcontrols img')) {
+    var ev = document.createEvent('HTMLEvents');
+    ev.initEvent('click', true, false);
+    o.dispatchEvent(ev);
+  }
 });
