@@ -7,6 +7,8 @@ var fs = require('fs');
 var dl = require('delivery');
 var JSZip = require('jszip');
 var childProcess = require("child_process");
+
+var Beatmap = require("./lib/Beatmap");
 // (function() {
 //     var oldSpawn = childProcess.spawn;
 //     function mySpawn() {
@@ -101,13 +103,17 @@ io.on('connection', function(socket) {
 							'error': 'No standard beatmaps found.'
 						});
 					} else {
+						Beatmap.ParseFile(mapdir + '/' + diffs[i][0], function(beatmap) {
+							console.log("SHIET");
+						});
+						var raw_data = fs.readFileSync(mapdir + '/' + diffs[i][0], {encoding:"utf-8"});
 						parser.parseFile(mapdir + '/' + diffs[i][0], function(err, beatmap) {
 							if (err) {
 								console.log(err);
 								socket.emit('osu', {
 									'error': 'Error occurred while processing files.'
 								});
-							} else if (beatmap.Mode == 0) socket.emit('osu', beatmap);
+							} else if (beatmap.Mode == 0) socket.emit('osu', raw_data);
 							else temp(i + 1);
 						});
 					}

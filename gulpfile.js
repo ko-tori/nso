@@ -19,6 +19,8 @@ gulp.task("concat-js", function() {
 
 			// other libs
 			"lib/Polyfill.js",
+			"lib/Color.js",
+			"lib/beatmap/TimingPoint.js",
 			"lib/Beatmap.js",
 
 			// main stuff
@@ -55,7 +57,7 @@ gulp.task("uglify-js", function() {
 // });
 
 gulp.task("watch", function() {
-	watch(["ext/*.js", "lib/*.js"], function() {
+	watch(["ext/*.js", "lib/**/*.js"], function() {
 		runsequence("concat-js" /* , "uglify-js"*/ );
 	});
 	// watch("css/src/*.css", function() {
