@@ -23,7 +23,7 @@ var Beatmap = require("./lib/Beatmap");
 var rooms = [];
 
 var oppai = function(path, onstdout, onstderr, onerr) {
-	var star = childProcess.spawn('./oppai/oppai-win.exe', [path, '-ojson']);
+	var star = childProcess.spawn('./oppai/oppai', [path, '-ojson']);
 	star.stdout.on('data', data => {
 		onstdout(JSON.parse(data))
 	});
@@ -96,6 +96,7 @@ io.on('connection', function(socket) {
 			var n = zip.file(/(.+)/).length;
 			var alldone = function() {
 				socket.emit('diffs', diffs);
+				console.log(diffs);
 				var temp = function(i) {
 					if (i >= diffs.length) {
 						console.log("No valid beatmaps found.");
@@ -103,19 +104,19 @@ io.on('connection', function(socket) {
 							'error': 'No standard beatmaps found.'
 						});
 					} else {
-						Beatmap.ParseFile(mapdir + '/' + diffs[i][0], function(beatmap) {
-							console.log("SHIET");
+						var raw_data = fs.readFileSync(mapdir + '/' + diffs[i][0], {
+							encoding: "utf-8"
 						});
-						var raw_data = fs.readFileSync(mapdir + '/' + diffs[i][0], {encoding:"utf-8"});
-						parser.parseFile(mapdir + '/' + diffs[i][0], function(err, beatmap) {
-							if (err) {
-								console.log(err);
-								socket.emit('osu', {
-									'error': 'Error occurred while processing files.'
-								});
-							} else if (beatmap.Mode == 0) socket.emit('osu', raw_data);
-							else temp(i + 1);
-						});
+						socket.emit('osu', raw_data);
+						// parser.parseFile(mapdir + '/' + diffs[i][0], function(err, beatmap) {
+						// 	if (err) {
+						// 		console.log(err);
+						// 		socket.emit('osu', {
+						// 			'error': 'Error occurred while processing files.'
+						// 		});
+						// 	} else if (true /*beatmap.Mode == 0*/ ) socket.emit('osu', raw_data);
+						// 	else temp(i + 1);
+						// });
 					}
 				};
 				temp(0);

@@ -20,6 +20,8 @@ gulp.task("concat-js", function() {
 			// other libs
 			"lib/Polyfill.js",
 			"lib/Color.js",
+			"lib/Vector.js",
+			"lib/beatmap/HitObject.js",
 			"lib/beatmap/TimingPoint.js",
 			"lib/Beatmap.js",
 
