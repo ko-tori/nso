@@ -10,12 +10,16 @@ var ods = function(n) {
   return [.0795 - .006 * n, .1395 - .008 * n, .1995 - .01 * n];
 };
 
-var e = function(img){ // check if image is empty
+var e = function(img) { // check if image is empty
   return img.width == 0 && img.height == 0;
 };
 
+function snap(n, a, b) {
+  return (Math.round((n - a) / b) * b + a).toFixed(3);
+}
+
 var concatImages = function(arr, overlap) {
-  if(!overlap) overlap = 0;
+  if (!overlap) overlap = 0;
   var canvas = document.createElement('canvas');
   var maxh = arr[0].height,
     w = arr[0].width;
@@ -35,7 +39,7 @@ var concatImages = function(arr, overlap) {
 };
 
 var tint = function(img, col) {
-  if(col == undefined) return img;
+  if (col == undefined) return img;
   var canvas = document.createElement('canvas');
   canvas.height = img.height;
   canvas.width = img.width;
@@ -198,7 +202,12 @@ var line = function(p, l) {
   // for (var i = 0; i < Math.round(l / step); i++) {
   //   a.push([p[0][0] + dx * i, p[0][1] + dy * i]);
   // }
-  return [[[p[0][0], p[0][1]], [p[0][0] + dx * l, p[0][1] + dy * l]], l];
+  return [
+    [
+      [p[0][0], p[0][1]],
+      [p[0][0] + dx * l, p[0][1] + dy * l]
+    ], l
+  ];
 };
 
 var bezier = function(p, l) {
@@ -300,11 +309,19 @@ var render_curve = function(p, cs, c1, c2) {
   ctx.lineJoin = ctx2.lineJoin = 'round';
   ctx.moveTo(x[0] - minx + cs / 2, y[0] - miny + cs / 2);
   ctx2.moveTo(x[0] - minx + cs / 2, y[0] - miny + cs / 2);
+<<<<<<< HEAD
+  for (i = 1; i < p.length; i++) {
+    ctx.lineTo(x[i] - minx + cs / 2, y[i] - miny + cs / 2);
+    ctx2.lineTo(x[i] - minx + cs / 2, y[i] - miny + cs / 2);
+  }
+  i = 0;
+=======
   for (i = 1; i < p.length; i++){
     ctx.lineTo(x[i] - minx + cs / 2, y[i] - miny + cs / 2);
     ctx2.lineTo(x[i] - minx + cs / 2, y[i] - miny + cs / 2);
   }
   i=0;
+>>>>>>> 720d2de72f73dd16d421f67da958380cb838b944
   while (a < cs / k) {
     ctx.lineWidth = ctx2.lineWidth = cs - a * k;
     if (i == 0) {
@@ -324,7 +341,7 @@ var render_curve = function(p, cs, c1, c2) {
     i++;
   }
   ctx2.globalAlpha = .75;
-  ctx2.drawImage(canvas,0,0);
+  ctx2.drawImage(canvas, 0, 0);
   return [canvas2, [minx / 2 - cs / 4, miny / 2 - cs / 4]];
 };
 
