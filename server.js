@@ -79,6 +79,12 @@ io.on('connection', function(socket) {
     });
     console.log('Received file: ' + file.name);
     JSZip.loadAsync(file.buffer).then(function(zip) {
+      try {
+        fs.accessSync("uploads");
+      }
+      catch (e) {
+        fs.mkdirSync("uploads");
+      }
       var mapdir = "uploads/" + file.name.replace(/\.osz$/, '');
       try {
         fs.accessSync(mapdir);
