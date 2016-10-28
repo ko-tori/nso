@@ -55,6 +55,7 @@ var get_room_list = function() {
 	return Object.keys(rooms).map(function(roomID) {
 		var room = rooms[roomID];
 		room["url"] = "/d/" + roomID;
+		room["difficulty"] = room["difficulty"].replace(".osu", "");
 		return room;
 	});
 };
@@ -72,6 +73,9 @@ lobby.on("connection", function(socket) {
 			return;
 		}
 		var room = randomString();
+		while (room in rooms) {
+			room = randomString();
+		}
 		rooms[room] = {
 			map: data.map,
 			difficulty: difficulty
