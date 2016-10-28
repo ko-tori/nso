@@ -12,7 +12,6 @@ gulp.task("concat-js", function() {
 	gulp.src([
 			// external libraries
 			"ext/jquery.min.js",
-			"ext/howler.min.js",
 			"ext/jszip.min.js",
 			"ext/delivery.js",
 			"ext/socket.io.min.js",
