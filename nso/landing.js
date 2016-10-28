@@ -7,6 +7,13 @@ socket.on("connect", function() {
 	var difficulties;
 	socket.on("rooms", function(rooms) {
 		console.log(rooms);
+		var html = "";
+		html += "<ul>";
+		for (var i = 0; i < rooms.length; i += 1) {
+			html+="<li><a href='" + rooms[i].url + "'>" + rooms[i].difficulty + "</a></li>";
+		}
+		html += "</ul>";
+		$("#rooms").html(html);
 	});
 	socket.on("choose diff", function(options) {
 		map = options.map;

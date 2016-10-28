@@ -47,9 +47,14 @@ app.get("/", function(req, res) {
 app.use(express.static("ext"));
 app.use(express.static("nso"));
 
+app.get("/d/:id", function(req, res) {
+	res.sendfile("nso/index.html");
+});
+
 var get_room_list = function() {
-	return Object.keys(io.sockets.adapter.rooms).map(function(roomID) {
-		var room = io.sockets.adapter.rooms[roomID];
+	return Object.keys(rooms).map(function(roomID) {
+		var room = rooms[roomID];
+		room["url"] = "/d/" + roomID;
 		return room;
 	});
 };
@@ -72,6 +77,7 @@ lobby.on("connection", function(socket) {
 			difficulty: difficulty
 		};
 		var url = "/d/" + room;
+		lobby.emit("rooms", get_room_list());
 		socket.emit("redirect to", url);
 	});
 	var delivery = dl.listen(socket);
