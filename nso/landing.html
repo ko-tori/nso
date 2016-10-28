@@ -1,0 +1,26 @@
+<html>
+	<head>
+		<title>editor¡nso</title>
+		<link rel="icon" href="nso.ico" type="image/vnd.microsoft.icon">
+		<link rel="stylesheet" href="remodal.css" />
+	</head>
+	<body>
+		<div style="width:60%;margin:auto;">
+			<h1>Welcome to editor¡nso</h1>
+			<p>Please upload a beatmap or select the room you would like to join.</p>
+			<div id="dropzone" style="width:100%;height:150px;line-height:150px;text-align:center;background-color:#f4f4f4;">Drop *.osz</div>
+			<h2>Rooms</h2>
+			<div id="rooms"></div>
+		</div>
+		<div class="remodal-bg">
+			<div id="modal" class="remodal" data-remodal-id="modal">
+				Loading difficulties...
+			</div>
+		</div>
+		<script src="jquery.min.js"></script>
+		<script src="delivery.js"></script>
+		<script src="socket.io.min.js"></script>
+		<script src="remodal.min.js"></script>
+		<script src="landing.js"></script>
+	</body>
+</html>

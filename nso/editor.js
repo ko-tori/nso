@@ -373,14 +373,6 @@ var getTimingPointAt = function(t) {
   return beatmap['timingPoints'][Math.max(i - 1, 0)];
 }; //returns timing point at t
 
-var coords = function(x, y) {
-
-}; //osupixels to canvas coords
-
-var coords2 = function(x, y) {
-
-}; //viewport to osupixels
-
 var anim = function() {
   window.requestAnimationFrame(anim);
   var t = source !== undefined ? source.getCurrentTime() : 0;
@@ -866,8 +858,10 @@ $('#lefttoolbar img').click(function() {
 var shiftalt = [false, false];
 
 var keypresshandler = function(e) {
-  e.preventDefault();
   var code = (window.event) ? event.keyCode : e.keyCode;
+  if(!(code == 122 || code == 123)){
+    e.preventDefault();
+  }
   if(keycodedbg) console.log("keycode: ", code);
   if (!shiftalt[0] && code == 16) {
     shiftalt[0] = true;
@@ -920,6 +914,14 @@ var keypresshandler = function(e) {
     $('#sound_clap').toggleClass('button_selected');
     vars.soundopts[2] = !vars.soundopts[2];
   }
+  else if (code == 84) { //t
+    $('#draw_beatsnap').toggleClass('button_selected');
+    vars.gridsnap = !vars.gridsnap;
+  }
+  else if (code == 89) { //y
+    $('#draw_distsnap').toggleClass('button_selected');
+    vars.distsnap = !vars.distsnap;
+  }
   else if (code == 76) { //l
     $('#draw_lock').toggleClass('button_selected');
     vars.locknotes = !vars.locknotes;
@@ -963,8 +965,9 @@ var wheelupdate = function(e) {
     if (pos >= source.getDuration()) source.pause(source.getDuration());
     else if (source.getPlaying())
       source.play(pos);
-    else
-      source.pause(pos);
+    else{
+      source.pause(snap(pos, tpt.baseOffset/1000, tpt.beatLength/1000/(e.shiftKey ? 1 : vars.beatsnapdivisor)));
+    }
   }
 };
 
