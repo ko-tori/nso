@@ -46,7 +46,7 @@ socket.on("connect", function() {
 		}
 	};
 	var upload = function(file) {
-		localStorage.setItem("upload", value);
+		localStorage.setItem("upload", file);
 		upload = "?";
 		var delivery = new Delivery(socket);
 		delivery.on("delivery.connect", function(delivery) {
