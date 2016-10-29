@@ -10,7 +10,7 @@ var JSZip = require("jszip");
 var childProcess = require("child_process");
 
 var oppai = function(file, callback) {
-	var child = childProcess.spawn("./oppai/oppai", [file, "-ojson"]);
+	var child = childProcess.spawn(/^win/.test(process.platform) ? "./oppai/oppai-win.exe" : "./oppai/oppai", [file, "-ojson"]);
 	child.stdout.on("data", function(data) {
 		callback(JSON.parse(data));
 	});
@@ -41,14 +41,14 @@ try {
 }
 
 app.get("/", function(req, res) {
-	res.sendfile("nso/landing.html");
+	res.sendFile(__dirname + "/nso/landing.html");
 });
 
 app.use(express.static("ext"));
 app.use(express.static("nso"));
 
 app.get("/d/:id", function(req, res) {
-	res.sendfile("nso/index.html");
+	res.sendFile(__dirname + "/nso/index.html");
 });
 
 var get_room_list = function() {
@@ -76,11 +76,41 @@ lobby.on("connection", function(socket) {
 		while (room in rooms) {
 			room = randomString();
 		}
-		rooms[room] = {
-			map: data.map,
-			difficulty: difficulty
-		};
 		var url = "/d/" + room;
+
+		var nsp = io.of(url);
+		var clients = {};
+		nsp.on('connection', function(socket){
+			socket.emit('hi','hi');
+			
+			socket.on('join', function(data){
+				for(var i in curs){
+					if(clients.hasOwnProperty(i)){
+						socket.emit('join', [i, curs[i]]);
+					}
+				}
+				socket.broadcast.emit('join', [socket.id, data]);
+				clients[socket.id] = data;
+			});
+		  
+			socket.on('disconnect', function(data){
+				delete clients[socket.id];
+				socket.broadcast.emit('leave', socket.id);
+			});
+
+			socket.on('get osz', function(data){
+				var path = path.join("uploads", data.map, difficulty);
+				//deliver file
+			});
+		});
+	
+		rooms[room] = { //nsp and clients are useless for now
+			map: data.map,
+			difficulty: difficulty,
+			nsp: nsp,
+			clients: clients
+		};
+
 		lobby.emit("rooms", get_room_list());
 		socket.emit("redirect to", url);
 	});

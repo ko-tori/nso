@@ -2,6 +2,7 @@ var socket = io.connect("/");
 var modal = $("[data-remodal-id=modal]").remodal({
 	hashTracking: false
 });
+var upload = "";
 socket.on("connect", function() {
 	var map;
 	var difficulties;
@@ -30,7 +31,7 @@ socket.on("connect", function() {
 		$("#modal").html(html);
 	});
 	socket.on("redirect to", function(url) {
-		window.location.href = url;
+		window.location.href = url + upload;
 	});
 	window.go = function() {
 		var diff = $("#choosediff").val();
@@ -45,6 +46,8 @@ socket.on("connect", function() {
 		}
 	};
 	var upload = function(file) {
+		localStorage.setItem("upload", value);
+		upload = "?";
 		var delivery = new Delivery(socket);
 		delivery.on("delivery.connect", function(delivery) {
 			delivery.send(file, {});
