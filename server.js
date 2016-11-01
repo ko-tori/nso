@@ -106,9 +106,7 @@ lobby.on("connection", function(socket) {
 	
 		rooms[room] = { //nsp and clients are useless for now
 			map: data.map,
-			difficulty: difficulty,
-			nsp: nsp,
-			clients: clients
+			difficulty: difficulty
 		};
 
 		lobby.emit("rooms", get_room_list());
