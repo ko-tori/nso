@@ -114,7 +114,7 @@ lobby.on("connection", function(socket) {
 			});
 		});
 
-		rooms[room] = { //nsp and clients are useless for now
+		rooms[room] = {
 			map: data.map,
 			difficulty: difficulty,
 		};
