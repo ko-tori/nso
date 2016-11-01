@@ -79,14 +79,16 @@ lobby.on("connection", function(socket) {
 		var url = "/d/" + room;
 
 		var nsp = io.of(url);
+		console.log("created room: " + url);
 		var clients = {};
 		nsp.on('connection', function(socket) {
+			console.log('Connection!');
 			socket.emit('hi', 'hi');
 
 			socket.on('join', function(data) {
 				for (var i in curs) {
 					if (clients.hasOwnProperty(i)) {
-						socket.emit('join', [i, curs[i]]);
+						socket.emit('join', i);
 					}
 				}
 				socket.broadcast.emit('join', [socket.id, data]);
@@ -98,13 +100,13 @@ lobby.on("connection", function(socket) {
 				socket.broadcast.emit('leave', socket.id);
 			});
 
-			var path = path.join("uploads", data.map, difficulty);
+			var filepath = path.join("uploads", data.map, difficulty);
 			var delivery = dl.listen(socket);
 			delivery.on('delivery.connect', function(delivery) {
 
 				delivery.send({
 					name: data.map + '.osz',
-					path: path
+					path: filepath
 				});
 
 				delivery.on('send.success', function(file) {
