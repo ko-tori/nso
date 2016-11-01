@@ -80,33 +80,43 @@ lobby.on("connection", function(socket) {
 
 		var nsp = io.of(url);
 		var clients = {};
-		nsp.on('connection', function(socket){
-			socket.emit('hi','hi');
-			
-			socket.on('join', function(data){
-				for(var i in curs){
-					if(clients.hasOwnProperty(i)){
+		nsp.on('connection', function(socket) {
+			socket.emit('hi', 'hi');
+
+			socket.on('join', function(data) {
+				for (var i in curs) {
+					if (clients.hasOwnProperty(i)) {
 						socket.emit('join', [i, curs[i]]);
 					}
 				}
 				socket.broadcast.emit('join', [socket.id, data]);
 				clients[socket.id] = data;
 			});
-		  
-			socket.on('disconnect', function(data){
+
+			socket.on('disconnect', function(data) {
 				delete clients[socket.id];
 				socket.broadcast.emit('leave', socket.id);
 			});
 
-			socket.on('get osz', function(data){
-				var path = path.join("uploads", data.map, difficulty);
-				//deliver file
+			var path = path.join("uploads", data.map, difficulty);
+			var delivery = dl.listen(socket);
+			delivery.on('delivery.connect', function(delivery) {
+
+				delivery.send({
+					name: data.map + '.osz',
+					path: path
+				});
+
+				delivery.on('send.success', function(file) {
+					console.log('File successfully sent to client!');
+				});
+
 			});
 		});
-	
+
 		rooms[room] = { //nsp and clients are useless for now
 			map: data.map,
-			difficulty: difficulty
+			difficulty: difficulty,
 		};
 
 		lobby.emit("rooms", get_room_list());
@@ -115,7 +125,8 @@ lobby.on("connection", function(socket) {
 	var delivery = dl.listen(socket);
 	delivery.on("receive.success", function(file) {
 		JSZip.loadAsync(file.buffer).then(function(zip) {
-			var dirname = randomString(), mapdir = path.join("uploads", dirname);
+			var dirname = randomString(),
+				mapdir = path.join("uploads", dirname);
 			while (fs.existsSync(mapdir)) {
 				dirname = randomString();
 				mapdir = path.join("uploads", dirname);

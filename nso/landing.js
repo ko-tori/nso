@@ -11,7 +11,7 @@ socket.on("connect", function() {
 		var html = "";
 		html += "<ul>";
 		for (var i = 0; i < rooms.length; i += 1) {
-			html+="<li><a href='" + rooms[i].url + "'>" + rooms[i].difficulty + "</a></li>";
+			html += "<li><a href='" + rooms[i].url + "'>" + rooms[i].difficulty + "</a></li>";
 		}
 		html += "</ul>";
 		$("#rooms").html(html);
@@ -45,8 +45,8 @@ socket.on("connect", function() {
 			}
 		}
 	};
+
 	var upload = function(file) {
-		localStorage.setItem("upload", file);
 		upload = "?";
 		var delivery = new Delivery(socket);
 		delivery.on("delivery.connect", function(delivery) {
