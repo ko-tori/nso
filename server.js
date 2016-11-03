@@ -82,11 +82,11 @@ lobby.on("connection", function(socket) {
 		console.log("created room: " + url);
 		var clients = {};
 		nsp.on('connection', function(socket) {
-			console.log('Connection!');
-			socket.emit('hi', 'hi');
+			console.log('Connection at ' + url);
+			socket.emit('hi', difficulty);
 
 			socket.on('join', function(data) {
-				for (var i in curs) {
+				for (var i in clients) {
 					if (clients.hasOwnProperty(i)) {
 						socket.emit('join', i);
 					}
@@ -101,15 +101,26 @@ lobby.on("connection", function(socket) {
 			});
 
 			var filepath = path.join("uploads", data.map, difficulty);
+			console.log(fs.existsSync(path.join("uploads", data.map, difficulty)));
 			var delivery = dl.listen(socket);
-			delivery.on('delivery.connect', function(delivery) {
+			delivery.on('delivery.connect', function(dlinstance) {
 
-				delivery.send({
-					name: data.map + '.osz',
-					path: filepath
+				function send() {
+					dlinstance.send({
+						name: data.map + '.osz',
+						path: filepath
+					});
+				}
+
+				socket.on('osz', send);
+
+				send();
+
+				dlinstance.on('send.start', function(filePackage) {
+					console.log("File is being sent to the client.");
 				});
 
-				delivery.on('send.success', function(file) {
+				dlinstance.on('send.success', function(file) {
 					console.log('File successfully sent to client!');
 				});
 
