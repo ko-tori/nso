@@ -40,6 +40,12 @@ try {
 	fs.mkdirSync("uploads");
 }
 
+try {
+	fs.accessSync("oszcache");
+} catch (e) {
+	fs.mkdirSync("oszcache");
+}
+
 app.get("/", function(req, res) {
 	res.sendFile(__dirname + "/nso/landing.html");
 });
@@ -58,6 +64,10 @@ var get_room_list = function() {
 		room["difficulty"] = room["difficulty"].replace(".osu", "");
 		return room;
 	});
+};
+
+var generate_osz = function(roomID) {
+
 };
 
 var lobby = io.of("/");
@@ -82,8 +92,8 @@ lobby.on("connection", function(socket) {
 		console.log("created room: " + url);
 		var clients = {};
 		nsp.on('connection', function(socket) {
-			console.log('Connection at ' + url);
-			socket.emit('hi', difficulty);
+			console.log(socket.id + ' joined ' + url);
+			socket.emit('hi', {difficulty: difficulty});
 
 			socket.on('join', function(data) {
 				for (var i in clients) {
@@ -100,15 +110,13 @@ lobby.on("connection", function(socket) {
 				socket.broadcast.emit('leave', socket.id);
 			});
 
-			var filepath = path.join("uploads", data.map, difficulty);
-			console.log(fs.existsSync(path.join("uploads", data.map, difficulty)));
 			var delivery = dl.listen(socket);
 			delivery.on('delivery.connect', function(dlinstance) {
 
 				function send() {
 					dlinstance.send({
 						name: data.map + '.osz',
-						path: filepath
+						path: path.join('oszcache', data.map)
 					});
 				}
 
@@ -116,13 +124,13 @@ lobby.on("connection", function(socket) {
 
 				send();
 
-				dlinstance.on('send.start', function(filePackage) {
-					console.log("File is being sent to the client.");
-				});
+				// dlinstance.on('send.start', function(filePackage) {
+				// 	console.log("File is being sent to the client.");
+				// });
 
-				dlinstance.on('send.success', function(file) {
-					console.log('File successfully sent to client!');
-				});
+				// dlinstance.on('send.success', function(file) {
+				// 	console.log('File successfully sent to client!');
+				// });
 
 			});
 		});
@@ -137,15 +145,15 @@ lobby.on("connection", function(socket) {
 	});
 	var delivery = dl.listen(socket);
 	delivery.on("receive.success", function(file) {
+		var dirname = randomString();
+		fs.writeFile(path.join('oszcache', dirname),file.buffer);
 		JSZip.loadAsync(file.buffer).then(function(zip) {
-			var dirname = randomString(),
-				mapdir = path.join("uploads", dirname);
+			var mapdir = path.join("uploads", dirname);
 			while (fs.existsSync(mapdir)) {
 				dirname = randomString();
 				mapdir = path.join("uploads", dirname);
 			}
 			fs.mkdirSync(mapdir);
-			console.log(mapdir);
 			var files = Object.keys(zip.files);
 			var difficulties = [];
 			(function next(i) {
