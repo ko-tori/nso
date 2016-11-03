@@ -105,6 +105,10 @@ lobby.on("connection", function(socket) {
 				clients[socket.id] = data;
 			});
 
+			socket.on('msg', function(data) {
+				socket.broadcast.emit('msg', data);
+			});
+
 			socket.on('disconnect', function(data) {
 				delete clients[socket.id];
 				socket.broadcast.emit('leave', socket.id);
