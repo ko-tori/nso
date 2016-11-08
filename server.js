@@ -57,19 +57,6 @@ app.get("/d/:id", function(req, res) {
 	res.sendFile(__dirname + "/nso/index.html");
 });
 
-app.get('/skin/:skin/:file', function(req, res) {
-	var path = __dirname + '/nso/Skins/' + req.params.skin + '/' + req.params.file;
-	if (fs.existsSync(path))
-		res.sendFile(path);
-	else {
-		path = __dirname + '/nso/Skins/Default/' + req.params.file;
-		if (fs.existsSync(path))
-			res.sendFile(path);
-		else
-			res.sendStatus(599);
-	}
-});
-
 var get_room_list = function() {
 	return Object.keys(rooms).map(function(roomID) {
 		var room = rooms[roomID];
