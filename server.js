@@ -57,6 +57,19 @@ app.get("/d/:id", function(req, res) {
 	res.sendFile(__dirname + "/nso/index.html");
 });
 
+app.get('/skin/:skin/:file', function(req, res) {
+	var path = __dirname + '/nso/Skins/' + req.params.skin + '/' + req.params.file;
+	if (fs.existsSync(path))
+		res.sendFile(path);
+	else {
+		path = __dirname + '/nso/Skins/Default/' + req.params.file;
+		if (fs.existsSync(path))
+			res.sendFile(path);
+		else
+			res.sendStatus(599);
+	}
+});
+
 var get_room_list = function() {
 	return Object.keys(rooms).map(function(roomID) {
 		var room = rooms[roomID];
@@ -93,7 +106,7 @@ lobby.on("connection", function(socket) {
 		var clients = {};
 		nsp.on('connection', function(socket) {
 			console.log(socket.id + ' joined ' + url);
-			socket.emit('hi', {difficulty: difficulty});
+			socket.emit('hi', { difficulty: difficulty });
 
 			socket.on('join', function(data) {
 				for (var i in clients) {
@@ -150,7 +163,7 @@ lobby.on("connection", function(socket) {
 	var delivery = dl.listen(socket);
 	delivery.on("receive.success", function(file) {
 		var dirname = randomString();
-		fs.writeFile(path.join('oszcache', dirname),file.buffer);
+		fs.writeFile(path.join('oszcache', dirname), file.buffer);
 		JSZip.loadAsync(file.buffer).then(function(zip) {
 			var mapdir = path.join("uploads", dirname);
 			while (fs.existsSync(mapdir)) {
