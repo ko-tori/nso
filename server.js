@@ -66,11 +66,11 @@ var get_room_list = function() {
 	});
 };
 
+var lobby = io.of("/lobby");
+
 var generate_osz = function(roomID) {
 
 };
-
-var lobby = io.of("/");
 
 lobby.on("connection", function(socket) {
 	socket.emit("rooms", get_room_list());
