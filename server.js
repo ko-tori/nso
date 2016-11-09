@@ -66,7 +66,11 @@ var get_room_list = function() {
 	});
 };
 
-var lobby = io.of("/lobby");
+var generate_osz = function(roomID) {
+
+};
+
+var lobby = io.of("/");
 
 lobby.on("connection", function(socket) {
 	socket.emit("rooms", get_room_list());
@@ -82,24 +86,77 @@ lobby.on("connection", function(socket) {
 		while (room in rooms) {
 			room = randomString();
 		}
+		var url = "/d/" + room;
+
+		var nsp = io.of(url);
+		console.log("created room: " + url);
+		var clients = {};
+		nsp.on('connection', function(socket) {
+			console.log(socket.id + ' joined ' + url);
+			socket.emit('hi', { difficulty: difficulty });
+
+			socket.on('join', function(data) {
+				for (var i in clients) {
+					if (clients.hasOwnProperty(i)) {
+						socket.emit('join', i);
+					}
+				}
+				socket.broadcast.emit('join', [socket.id, data]);
+				clients[socket.id] = data;
+			});
+
+			socket.on('msg', function(data) {
+				socket.broadcast.emit('msg', data);
+			});
+
+			socket.on('disconnect', function(data) {
+				delete clients[socket.id];
+				socket.broadcast.emit('leave', socket.id);
+			});
+
+			var delivery = dl.listen(socket);
+			delivery.on('delivery.connect', function(dlinstance) {
+
+				function send() {
+					dlinstance.send({
+						name: data.map + '.osz',
+						path: path.join('oszcache', data.map)
+					});
+				}
+
+				socket.on('osz', send);
+
+				send();
+
+				// dlinstance.on('send.start', function(filePackage) {
+				// 	console.log("File is being sent to the client.");
+				// });
+
+				// dlinstance.on('send.success', function(file) {
+				// 	console.log('File successfully sent to client!');
+				// });
+
+			});
+		});
+
 		rooms[room] = {
 			map: data.map,
 			difficulty: difficulty,
 		};
-		var url = "/d/" + room;
+
 		lobby.emit("rooms", get_room_list());
 		socket.emit("redirect to", url);
 	});
 	var delivery = dl.listen(socket);
 	delivery.on("receive.success", function(file) {
 		var dirname = randomString();
+		fs.writeFile(path.join('oszcache', dirname), file.buffer);
 		JSZip.loadAsync(file.buffer).then(function(zip) {
 			var mapdir = path.join("uploads", dirname);
 			while (fs.existsSync(mapdir)) {
 				dirname = randomString();
 				mapdir = path.join("uploads", dirname);
 			}
-			fs.writeFile(path.join('oszcache', dirname), file.buffer);
 			fs.mkdirSync(mapdir);
 			var files = Object.keys(zip.files);
 			var difficulties = [];
