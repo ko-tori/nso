@@ -1,4 +1,4 @@
-var socket = io.connect("/");
+var socket = io.connect("/lobby");
 var modal = $("[data-remodal-id=modal]").remodal({
 	hashTracking: false
 });

@@ -60,7 +60,7 @@ var get_room_list = function() {
 	});
 };
 
-var lobby = io.of("/");
+var lobby = io.of("/lobby");
 
 lobby.on("connection", function(socket) {
 	socket.emit("rooms", get_room_list());
