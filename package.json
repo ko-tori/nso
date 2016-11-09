@@ -5,7 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "async": "^2.0.0-rc.6",
-    "delivery": "^0.0.4",
+    "delivery": "https://github.com/ko-tori/Delivery.js/tarball/master",
     "express": "^4.14.0",
     "jszip": "^3.1.1",
     "osu-parser": "git://github.com/ko-tori/osu-parser.git#master",

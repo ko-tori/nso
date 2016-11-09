@@ -10,7 +10,7 @@ var JSZip = require("jszip");
 var childProcess = require("child_process");
 
 var oppai = function(file, callback) {
-	var child = childProcess.spawn("./oppai/oppai", [file, "-ojson"]);
+	var child = childProcess.spawn(/^win/.test(process.platform) ? "./oppai/oppai-win.exe" : "./oppai/oppai", [file, "-ojson"]);
 	child.stdout.on("data", function(data) {
 		callback(JSON.parse(data));
 	});
@@ -40,15 +40,21 @@ try {
 	fs.mkdirSync("uploads");
 }
 
+try {
+	fs.accessSync("oszcache");
+} catch (e) {
+	fs.mkdirSync("oszcache");
+}
+
 app.get("/", function(req, res) {
-	res.sendfile("nso/landing.html");
+	res.sendFile(__dirname + "/nso/landing.html");
 });
 
 app.use(express.static("ext"));
 app.use(express.static("nso"));
 
 app.get("/d/:id", function(req, res) {
-	res.sendfile("nso/index.html");
+	res.sendFile(__dirname + "/nso/index.html");
 });
 
 var get_room_list = function() {
@@ -78,7 +84,7 @@ lobby.on("connection", function(socket) {
 		}
 		rooms[room] = {
 			map: data.map,
-			difficulty: difficulty
+			difficulty: difficulty,
 		};
 		var url = "/d/" + room;
 		lobby.emit("rooms", get_room_list());
@@ -86,14 +92,15 @@ lobby.on("connection", function(socket) {
 	});
 	var delivery = dl.listen(socket);
 	delivery.on("receive.success", function(file) {
+		var dirname = randomString();
 		JSZip.loadAsync(file.buffer).then(function(zip) {
-			var dirname = randomString(), mapdir = path.join("uploads", dirname);
+			var mapdir = path.join("uploads", dirname);
 			while (fs.existsSync(mapdir)) {
 				dirname = randomString();
 				mapdir = path.join("uploads", dirname);
 			}
+			fs.writeFile(path.join('oszcache', dirname), file.buffer);
 			fs.mkdirSync(mapdir);
-			console.log(mapdir);
 			var files = Object.keys(zip.files);
 			var difficulties = [];
 			(function next(i) {
