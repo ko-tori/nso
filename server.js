@@ -57,43 +57,17 @@ app.get("/d/:id", function(req, res) {
 	res.sendFile(__dirname + "/nso/index.html");
 });
 
-var get_room_list = function() {
-	return Object.keys(rooms).map(function(roomID) {
-		var room = rooms[roomID];
-		room["url"] = "/d/" + roomID;
-		room["difficulty"] = room["difficulty"].replace(".osu", "");
-		return room;
-	});
-};
-
-var lobby = io.of("/lobby");
-
-var generate_osz = function(roomID) {
-
-};
-
-lobby.on("connection", function(socket) {
-	socket.emit("rooms", get_room_list());
-	socket.on("get url", function(data) {
-		if (!fs.existsSync(path.join("uploads", data.map))) {
-			return;
-		}
-		var difficulty = new Buffer(data.difficulty, "base64").toString("ascii");
-		if (!fs.existsSync(path.join("uploads", data.map, difficulty))) {
-			return;
-		}
-		var room = randomString();
-		while (room in rooms) {
-			room = randomString();
-		}
-		var url = "/d/" + room;
-
+var create_room = function(roomID) {
+	var url = "/d/" + roomID;
+	if (!(url in io.nsps)) {
 		var nsp = io.of(url);
+		var room = rooms[url.substring(3)];
 		console.log("created room: " + url);
 		var clients = {};
 		nsp.on('connection', function(socket) {
 			console.log(socket.id + ' joined ' + url);
-			socket.emit('hi', { difficulty: difficulty });
+			
+			socket.emit('hi', { difficulty: room.difficulty });
 
 			socket.on('join', function(data) {
 				for (var i in clients) {
@@ -119,8 +93,8 @@ lobby.on("connection", function(socket) {
 
 				function send() {
 					dlinstance.send({
-						name: data.map + '.osz',
-						path: path.join('oszcache', data.map)
+						name: room.map + '.osz',
+						path: path.join('oszcache', room.map)
 					});
 				}
 
@@ -138,11 +112,47 @@ lobby.on("connection", function(socket) {
 
 			});
 		});
+	}
+};
+
+var get_room_list = function() {
+	return Object.keys(rooms).map(function(roomID) {
+		return {
+			url: "/d/" + roomID,
+			difficulty: rooms[roomID].difficulty.replace(".osu", "")
+		};
+	});
+};
+
+var lobby = io.of("/lobby");
+
+var generate_osz = function(roomID) {
+
+};
+
+lobby.on("connection", function(socket) {
+	socket.emit("rooms", get_room_list());
+	socket.on("get url", function(data) {
+		if (!fs.existsSync(path.join("uploads", data.map))) {
+			return;
+		}
+		var difficulty = new Buffer(data.difficulty, "base64").toString("ascii");
+		if (!fs.existsSync(path.join("uploads", data.map, difficulty))) {
+			return;
+		}
+		var room = randomString();
+		while (room in rooms) {
+			room = randomString();
+		}
 
 		rooms[room] = {
 			map: data.map,
 			difficulty: difficulty,
 		};
+
+		var url = "/d/" + room;
+		create_room(room);
+		console.log(url in io.nsps);
 
 		lobby.emit("rooms", get_room_list());
 		socket.emit("redirect to", url);
