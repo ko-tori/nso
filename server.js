@@ -66,7 +66,7 @@ var create_room = function(roomID) {
 		var clients = {};
 		nsp.on('connection', function(socket) {
 			console.log(socket.id + ' joined ' + url);
-			
+
 			socket.emit('hi', { difficulty: room.difficulty });
 
 			socket.on('join', function(data) {
@@ -152,7 +152,6 @@ lobby.on("connection", function(socket) {
 
 		var url = "/d/" + room;
 		create_room(room);
-		console.log(url in io.nsps);
 
 		lobby.emit("rooms", get_room_list());
 		socket.emit("redirect to", url);
@@ -170,7 +169,7 @@ lobby.on("connection", function(socket) {
 			fs.mkdirSync(mapdir);
 			var files = Object.keys(zip.files);
 			var difficulties = [];
-			(function next(i) {
+			(function next(i) { 
 				if (i < files.length) {
 					zip.file(files[i]).async("arraybuffer").then(function(content) {
 						fs.writeFile(path.join(mapdir, files[i]), new Buffer(content), function(err) {

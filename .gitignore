@@ -2,5 +2,5 @@ node_modules
 uploads
 oszcache
 npm-debug.log
-run
+run*
 nso/nso.js
