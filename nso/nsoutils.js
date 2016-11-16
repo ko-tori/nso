@@ -15,7 +15,8 @@ var e = function(img) { // check if image is empty
 };
 
 function snap(n, a, b) {
-  return Math.max(0, Math.floor((Math.round((n - a) / b) * b + a) * 1000) / 1000);
+  if(n <= 0) return 0;
+  return Math.round((n - a) / b) * b + a;
 }
 
 var concatImages = function(arr, overlap) {

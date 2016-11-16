@@ -55,6 +55,9 @@ app.use(express.static("nso"));
 
 app.get("/d/:id", function(req, res) {
 	res.sendFile(__dirname + "/nso/index.html");
+	if(!rooms.hasOwnProperty(req.params.id)) {
+		
+	}
 });
 
 var create_room = function(roomID) {
@@ -127,7 +130,7 @@ var get_room_list = function() {
 var lobby = io.of("/lobby");
 
 var generate_osz = function(roomID) {
-
+	
 };
 
 lobby.on("connection", function(socket) {

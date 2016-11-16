@@ -34,7 +34,7 @@ socket.on("connect", function() {
 	});
 	window.go = function() {
 		var diff = $("#choosediff").val();
-		for (var i = 0; i < difficulties.length; i += 1) {
+		for (var i = 0; i < difficulties.length; i++) {
 			if (difficulties[i].choice == diff) {
 				var difficulty = difficulties[i];
 				socket.emit("get url", {
