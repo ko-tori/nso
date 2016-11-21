@@ -55,8 +55,8 @@ app.use(express.static("nso"));
 
 app.get("/d/:id", function(req, res) {
 	res.sendFile(__dirname + "/nso/index.html");
-	if(!rooms.hasOwnProperty(req.params.id)) {
-		
+	if (!rooms.hasOwnProperty(req.params.id)) {
+
 	}
 });
 
@@ -130,7 +130,7 @@ var get_room_list = function() {
 var lobby = io.of("/lobby");
 
 var generate_osz = function(roomID) {
-	
+
 };
 
 lobby.on("connection", function(socket) {
@@ -172,9 +172,16 @@ lobby.on("connection", function(socket) {
 			fs.mkdirSync(mapdir);
 			var files = Object.keys(zip.files);
 			var difficulties = [];
-			(function next(i) { 
+			(function next(i) {
 				if (i < files.length) {
 					zip.file(files[i]).async("arraybuffer").then(function(content) {
+						// console.log(path.split('/').slice(0, -1)); // this is supposed to create subdirectories from the zip (doesn't work)
+						// path.split('/').slice(0, -1).reduce(function(prev, curr, i) {
+						// 	if (fs.existsSync(prev) === false) {
+						// 		fs.mkdirSync(prev);
+						// 	}
+						// 	return prev + '/' + curr;
+						// });
 						fs.writeFile(path.join(mapdir, files[i]), new Buffer(content), function(err) {
 							if (err) console.log(err);
 							if (files[i].toLowerCase().endsWith(".osu")) {

@@ -148,7 +148,12 @@ img {
     display: flex;
 }
 
-#centersection>canvas {
+#canvases {
+    top: 0;
+    left: 0;
+}
+
+#canvases>canvas {
     position: absolute;
     top: 0;
     left: 0;
@@ -164,17 +169,8 @@ img {
     z-index: -10;
 }
 
-.gridtemp {
-    transform: translateX(-50%);
-}
-
 #grid {
-    top: 16%;
-    left: 50%;
     position: absolute;
-    height: 76vmin;
-    width: auto;
-    opacity: .67;
     z-index: 1;
 }
 

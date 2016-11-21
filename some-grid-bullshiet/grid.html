@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>grid test</title>
+	<style>
+	*{
+		-webkit-user-select:none;
+	}
+	#bg {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-image: url(bg.jpg);
+		background-size: cover;
+		background-repeat: no-repeat;
+	}
+	
+	#grid {
+		position: absolute;
+	}
+	</style>
+	<script src="../ext/jquery.min.js"></script>
+</head>
+
+<body>
+	<div id='bg'></div>
+	<canvas id='grid'></canvas>
+	<script>
+	var drawGrid = function(level, grid) {
+		if(!grid) grid = $('#grid');
+		var h = grid.height();
+		var w = grid.width();
+		var px = h / 384;
+		var ctx = grid[0].getContext('2d');
+		var cs = Math.pow(2, level + 1);
+
+		ctx.clearRect(0, 0, w, h);
+		ctx.strokeStyle = '#FFF';
+		ctx.lineWidth = px;
+
+		for (var i = 0; i <= 384; i += cs) {
+			ctx.globalAlpha = i == 384 / 2 ? .25 : .125;
+			ctx.beginPath();
+			ctx.moveTo(0, i * px);
+			ctx.lineTo(512 * px, i * px);
+			ctx.stroke();
+		}
+
+		for (i = 0; i <= 512; i += cs) {
+			ctx.globalAlpha = i == 512 / 2 ? .25 : .125;
+			ctx.beginPath();
+			ctx.moveTo(i * px, 0);
+			ctx.lineTo(i * px, 384 * px);
+			ctx.stroke();
+		}
+	}
+
+	function f() {
+		var height = $(window).height() * 0.75;
+		var width = height * 4 / 3;
+		var grid = $("#grid");
+		grid.attr("width", width);
+		grid.attr("height", height);
+		grid.css({
+			'left': ($(window).width() - width) / 2,
+			'top': $(window).height() * 0.16
+		});
+		drawGrid(1);
+	};
+	$(window).on('resize', f);
+	f();
+	</script>
+</body>
+
+</html>
