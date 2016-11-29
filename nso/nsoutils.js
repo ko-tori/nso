@@ -14,9 +14,8 @@ var e = function(img) { // check if image is empty
   return img.width == 0 && img.height == 0;
 };
 
-function snap(n, a, b) {
-  if(n <= 0) return 0;
-  return Math.max(0, Math.floor((Math.round((n - a) / b) * b + a) * 1000) / 1000);;
+var snap = function(n, a, b) {
+  return Math.max(0, Math.round((Math.round((n - a) / b) * b + a) * 1000) / 1000);
 }
 
 var concatImages = function(arr, overlap) {
@@ -221,8 +220,7 @@ var bezier = function(p, l) {
       part = p.slice(prev, i);
       c = bezier2(part, l);
       arr = arr.concat(c[0]);
-    }
-    else if (i < p.length && p[i].equals(p[i - 1])) {
+    } else if (i < p.length && p[i].equals(p[i - 1])) {
       part = p.slice(prev, i);
       c = part.length == 2 ? line(part) : bezier2(part);
       c[0].pop();
@@ -246,13 +244,11 @@ var passthrough = function(p, l, step) {
     m = -(b[0] - c[0]) / (b[1] - c[1]);
     x = x1;
     y = m * (x - x2) + y2;
-  }
-  else if (b[1] == c[1]) {
+  } else if (b[1] == c[1]) {
     m = -(b[0] - a[0]) / (b[1] - a[1]);
     x = x2;
     y = m * (x - x1) + y1;
-  }
-  else {
+  } else {
     var m1 = -(b[0] - a[0]) / (b[1] - a[1]),
       m2 = -(b[0] - c[0]) / (b[1] - c[1]);
     if (m1 == m2) return line(p, l)[0];
@@ -321,8 +317,7 @@ var render_curve = function(p, cs, c1, c2) {
       ctx2.strokeStyle = toRGB(c2);
       a += cs / 10 / k;
       ctx2.stroke();
-    }
-    else {
+    } else {
       var c = a / cs * k / 4 * 255;
       ctx.strokeStyle = toRGB([c1[0] + c, c1[1] + c, c1[2] + c]);
       a += k;
@@ -399,8 +394,7 @@ var render_curve2 = function(p, cs) {
       ctx2.strokeStyle = '#FFF';
       a += cs / 10 / k;
       ctx2.stroke();
-    }
-    else {
+    } else {
       var c = a / cs * k / 8;
       ctx.globalAlpha = c;
       ctx.strokeStyle = '#FFF';
