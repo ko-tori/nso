@@ -3,7 +3,7 @@
 Collaborative editor for osu!
 
 # To Do:
-- canvas-drawn grid
-- rendering
-- editing
-- persist rooms
+- [x] ~~canvas-drawn grid~~ 
+- [ ] rendering _in progress_
+- [ ] editing
+- [ ] persist rooms
