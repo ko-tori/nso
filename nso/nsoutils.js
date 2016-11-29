@@ -135,7 +135,7 @@ var spline_len = function(p) {
 var lenp = function(p) {
   var n = p.length - 1;
   if (n == 1) return dist(p[0], p[1]);
-  var [px, py] = p[0];
+  var [px, py] = p[0].toArray();
   var l = 0;
   for (var s = 0; s < 101; s++) {
     var t = s / 100;
@@ -171,7 +171,7 @@ var bezier2 = function(p, l) {
   }
   var arr = [],
     l1 = 0;
-  var [px, py] = p[0];
+  var [px, py] = p[0].toArray();
   var x, y, dx, dy, m, t;
   for (var i = 0; i < Math.floor(l / prec); i++) {
     t = i * prec / l;
