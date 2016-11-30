@@ -171,7 +171,7 @@ var bezier2 = function(p, l) {
     [x, y] = b(t);
     dx = x - px;
     dy = y - py;
-    m = pow(pow(dx, 2) + pow(dy, 2), .5);
+    m = Math.sqrt(pow(dx, 2) + pow(dy, 2));
     if (m != 0 && l1 + m >= l) return [arr.concat([
       [px + dx / m * (l1 - l), py + dy / m * (l1 - l)]
     ]), l];
@@ -187,7 +187,7 @@ var line = function(p, l) {
   // if (step === undefined) step = 10;
   var dx = p[1].x - p[0].x,
     dy = p[1].y - p[0].y;
-  var m = pow(pow(dx, 2) + pow(dy, 2), .5);
+  var m = Math.sqrt(pow(dx, 2) + pow(dy, 2));
   if (l == undefined) l = m;
   dx /= m;
   dy /= m;
