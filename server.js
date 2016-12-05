@@ -175,15 +175,15 @@ lobby.on("connection", function(socket) {
 			(function next(i) {
 				if (i < files.length) {
 					zip.file(files[i]).async("arraybuffer").then(function(content) {
-						// console.log(path.split('/').slice(0, -1)); // this is supposed to create subdirectories from the zip (doesn't work)
-						// path.split('/').slice(0, -1).reduce(function(prev, curr, i) {
-						// 	if (fs.existsSync(prev) === false) {
-						// 		fs.mkdirSync(prev);
-						// 	}
-						// 	return prev + '/' + curr;
-						// });
+						var temppath = path.join(mapdir, files[i]);
+						temppath.split('\\').reduce(function(prev, curr, i) {
+							if (fs.existsSync(prev) === false) {
+								fs.mkdirSync(prev);
+							}
+							return prev + '\\' + curr;
+						});
 						fs.writeFile(path.join(mapdir, files[i]), new Buffer(content), function(err) {
-							if (err) console.log(err);
+							if (err) console.log("Error while writing file: ", err);
 							if (files[i].toLowerCase().endsWith(".osu")) {
 								oppai(path.join(__dirname, mapdir, files[i]), function(data) {
 									data["choice"] = new Buffer(files[i]).toString("base64");
