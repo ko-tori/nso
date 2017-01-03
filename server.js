@@ -56,7 +56,16 @@ app.use(express.static("nso"));
 app.get("/d/:id", function(req, res) {
 	res.sendFile(__dirname + "/nso/index.html");
 	if (!rooms.hasOwnProperty(req.params.id)) {
+		var nsp = io.of(req.originalUrl);
+		nsp.on('connection', function(socket) {
+			socket.emit('badurl', '');
 
+			socket.on('disconnect', function() {
+				if (Object.keys(nsp.connected).length === 0) {
+					delete io.nsps[nsp.name];
+				}
+			});
+		});
 	}
 });
 
@@ -118,7 +127,6 @@ var create_room = function(roomID) {
 				});
 
 				socket.on('edit move', function(data) {
-					console.log(data);
 					var obj = beatmap.matchObj(HitObject.parse(data[0]));
 					if(obj) {
 						obj.position.x = data[1];
