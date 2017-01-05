@@ -438,3 +438,18 @@ img {
 .button_selected {
     opacity: 1 !important;
 }
+
+#statuslabel {
+    position: absolute;
+    top: 1%;
+    right: 1%;
+    color: black;
+    font-size: 18px;
+    font-family: "Century Gothic";
+    background-color: #ddd;
+    border: 1px solid #C3F4E6;
+    border-radius: 4px;
+    padding: 1% 2%;
+    display: none;
+    z-index: 10;
+}

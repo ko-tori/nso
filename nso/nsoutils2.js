@@ -234,7 +234,7 @@ var passthrough = function(p, l, step) {
   if (a.y == b.y && b.y == c.y) return line(p, l)[0];
   var m, x, y;
   if (a.y == b.y) {
-    m = -(b.x - c[0]) / (b.y - c.y);
+    m = -(b.x - c.x) / (b.y - c.y);
     x = x1;
     y = m * (x - x2) + y2;
   } else if (b.y == c.y) {

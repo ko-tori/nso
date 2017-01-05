@@ -40,18 +40,26 @@ try {
 	fs.mkdirSync("uploads");
 }
 
-try {
-	fs.accessSync("oszcache");
-} catch (e) {
-	fs.mkdirSync("oszcache");
-}
-
 app.get("/", function(req, res) {
 	res.sendFile(__dirname + "/nso/landing.html");
 });
 
 app.use(express.static("ext"));
 app.use(express.static("nso"));
+
+app.get("/f/:id*", function(req, res) {
+	var id = rooms[req.params.id];
+	if (typeof id == "undefined") res.sendStatus(404);
+	var file = `${__dirname}/uploads/${id.map + req.params[0]}`;
+	fs.exists(file, function(exists) {
+		if (!exists) {
+			res.sendStatus(404);
+		} else {
+			//console.log("sending: " + file);
+			res.sendFile(file);
+		}
+	});
+});
 
 app.get("/d/:id", function(req, res) {
 	res.sendFile(__dirname + "/nso/index.html");
@@ -102,37 +110,12 @@ var create_room = function(roomID) {
 					socket.broadcast.emit('leave', socket.client.id);
 				});
 
-				var delivery = dl.listen(socket);
-				delivery.on('delivery.connect', function(dlinstance) {
-
-					function send() {
-						dlinstance.send({
-							name: room.map + '.osz',
-							path: path.join('oszcache', room.map)
-						});
-					}
-
-					socket.on('osz', send);
-
-					send();
-
-					// dlinstance.on('send.start', function(filePackage) {
-					// 	console.log("File is being sent to the client.");
-					// });
-
-					// dlinstance.on('send.success', function(file) {
-					// 	console.log('File successfully sent to client!');
-					// });
-
-				});
-
 				socket.on('edit move', function(data) {
 					var obj = beatmap.matchObj(HitObject.parse(data[0]));
-					if(obj) {
+					if (obj) {
 						obj.position.x = data[1];
 						obj.position.y = data[2];
-					}
-					else {
+					} else {
 						//console.log('object not found!');
 					}
 					socket.broadcast.emit('edit move', data);
@@ -186,7 +169,6 @@ lobby.on("connection", function(socket) {
 	var delivery = dl.listen(socket);
 	delivery.on("receive.success", function(file) {
 		var dirname = randomString();
-		fs.writeFile(path.join('oszcache', dirname), file.buffer);
 		JSZip.loadAsync(file.buffer).then(function(zip) {
 			var mapdir = path.join("uploads", dirname);
 			while (fs.existsSync(mapdir)) {
