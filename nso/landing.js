@@ -47,6 +47,7 @@ socket.on("connect", function() {
 	var upload = function(file) {
 		var delivery = new Delivery(socket);
 		delivery.on("delivery.connect", function(delivery) {
+			console.log('sending...');
 			delivery.send(file, {});
 		});
 		delivery.on("send.success", function(file) {

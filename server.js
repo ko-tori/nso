@@ -9,16 +9,18 @@ var dl = require("delivery");
 var JSZip = require("jszip");
 var childProcess = require("child_process");
 
-var oppai = function(file, callback) {
+var oppai = function(file, callback, err) {
 	var child = childProcess.spawn(/^win/.test(process.platform) ? "./oppai/oppai-win.exe" : "./oppai/oppai", [file, "-ojson"]);
 	child.stdout.on("data", function(data) {
 		callback(JSON.parse(data));
 	});
 	child.stderr.on("data", function(data) {
-		console.error("stderr:", data.toString());
+		if (err) err(data);
+		else console.error("err:", data.toString());
 	});
 	child.on("error", function(data) {
-		console.error("err:", data.toString());
+		if (err) err(data);
+		else console.error("err:", data.toString());
 	});
 }
 
@@ -194,6 +196,8 @@ lobby.on("connection", function(socket) {
 								oppai(path.join(__dirname, mapdir, files[i]), function(data) {
 									data["choice"] = new Buffer(files[i]).toString("base64");
 									difficulties.push(data);
+									next(i + 1);
+								}, function(err) {
 									next(i + 1);
 								});
 							} else {
