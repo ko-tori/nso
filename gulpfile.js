@@ -15,6 +15,7 @@ gulp.task("concat-js", function() {
 			"ext/jszip.min.js",
 			"ext/delivery.js",
 			"ext/socket.io.min.js",
+			"nso/nsoutils2.js",
 
 			// other libs
 			"lib/Polyfill.js",
@@ -32,8 +33,8 @@ gulp.task("concat-js", function() {
 			"lib/Main.js"
 		])
 		.pipe(sourcemaps.init())
-		.pipe(concatjs("nso.js"))
 		.pipe(sourcemaps.write())
+		.pipe(concatjs("nso.js"))
 		.pipe(gulp.dest("nso"));
 });
 

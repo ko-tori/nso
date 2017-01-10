@@ -4,3 +4,4 @@ oszcache
 npm-debug.log
 run*
 nso/nso.js
+db.json
