@@ -50,12 +50,13 @@ socket.on("connect", function () {
 	var upload = function (file) {
 		var delivery = new Delivery(socket);
 		delivery.on("delivery.connect", function (delivery) {
+			$("#modal").html("uploading...");
+			modal.open();
 			console.log('sending...');
 			delivery.send(file, {});
 		});
 		delivery.on("send.success", function (file) {
 			console.log("File was sent to the server:", file);
-			modal.open();
 		});
 	};
 	$("#dropzone").on("drag dragstart dragend dragover dragenter dragleave drop", function (e) {
