@@ -9,6 +9,7 @@ socket.on("connect", function () {
 		console.log(rooms);
 		var html = "";
 		html += "<ul>";
+		if (rooms.length == 0) html += "<li><a id='norooms'>No rooms currently.</a></li>";
 		for (var i = 0; i < rooms.length; i += 1) {
 			var room = rooms[i];
 			if (!room.url || !room.difficulty) continue;
