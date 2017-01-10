@@ -10,9 +10,8 @@
     "jszip": "^3.1.1",
     "lowdb": "^0.14.0",
     "osu-parser": "https://github.com/ko-tori/osu-parser/tarball/master",
-    "socket.io": "^1.4.8"
-  },
-  "devDependencies": {
+    "socket.io": "^1.4.8",
+    
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-rename": "^1.2.2",
@@ -23,6 +22,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "concat": "gulp concat-js",
     "start": "node server.js"
   },
   "keywords": [],
