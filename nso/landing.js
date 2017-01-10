@@ -2,20 +2,22 @@ var socket = io.connect("/lobby");
 var modal = $("[data-remodal-id=modal]").remodal({
 	hashTracking: false
 });
-socket.on("connect", function() {
+socket.on("connect", function () {
 	var map;
 	var difficulties;
-	socket.on("rooms", function(rooms) {
+	socket.on("rooms", function (rooms) {
 		console.log(rooms);
 		var html = "";
 		html += "<ul>";
 		for (var i = 0; i < rooms.length; i += 1) {
-			html+="<li><a href='" + rooms[i].url + "'>" + rooms[i].difficulty + "</a></li>";
+			var room = rooms[i];
+			if (!room.url || !room.difficulty) continue;
+			html += "<li><a href='" + room.url + "'>" + room.difficulty + "</a></li>";
 		}
 		html += "</ul>";
 		$("#rooms").html(html);
 	});
-	socket.on("choose diff", function(options) {
+	socket.on("choose diff", function (options) {
 		map = options.map;
 		difficulties = options.difficulties;
 		console.log("Choosing diff", options);
@@ -29,10 +31,10 @@ socket.on("connect", function() {
 		html += "<p><button onclick='javascript:go();'>Edit!</button></p>";
 		$("#modal").html(html);
 	});
-	socket.on("redirect to", function(url) {
+	socket.on("redirect to", function (url) {
 		window.location.href = url;
 	});
-	window.go = function() {
+	window.go = function () {
 		var diff = $("#choosediff").val();
 		for (var i = 0; i < difficulties.length; i++) {
 			if (difficulties[i].choice == diff) {
@@ -44,28 +46,28 @@ socket.on("connect", function() {
 			}
 		}
 	};
-	var upload = function(file) {
+	var upload = function (file) {
 		var delivery = new Delivery(socket);
-		delivery.on("delivery.connect", function(delivery) {
+		delivery.on("delivery.connect", function (delivery) {
 			console.log('sending...');
 			delivery.send(file, {});
 		});
-		delivery.on("send.success", function(file) {
+		delivery.on("send.success", function (file) {
 			console.log("File was sent to the server:", file);
 			modal.open();
 		});
 	};
-	$("#dropzone").on("drag dragstart dragend dragover dragenter dragleave drop", function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-		})
-		.on("dragover dragenter", function() {
+	$("#dropzone").on("drag dragstart dragend dragover dragenter dragleave drop", function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+	})
+		.on("dragover dragenter", function () {
 			$(this).addClass("is-dragover");
 		})
-		.on("dragleave dragend drop", function() {
+		.on("dragleave dragend drop", function () {
 			$(this).removeClass("is-dragover");
 		})
-		.on("drop", function(e) {
+		.on("drop", function (e) {
 			// console.log("Dropped.", e);
 			upload(e.originalEvent.dataTransfer.files[0]);
 		});
