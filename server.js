@@ -9,6 +9,10 @@ var dl = require("delivery");
 var JSZip = require("jszip");
 var childProcess = require("child_process");
 
+var bodyParser = require("body-parser");
+var cookieParser = require("cookie-parser");
+var session = require("express-session");
+
 var oppai = function (file, callback, err) {
     var child = childProcess.spawn(/^win/.test(process.platform) ? "./oppai/oppai-win.exe" : "./oppai/oppai", [file, "-ojson"]);
     child.stdout.on("data", function (data) {
@@ -33,6 +37,7 @@ var oppai = function (file, callback, err) {
 var Beatmap = require("./lib/Beatmap");
 var Room = require("./lib/Room");
 var Util = require("./lib/Util");
+var User = require("./lib/User");
 var common = require("./common");
 
 var rooms = Room.all();
@@ -44,8 +49,37 @@ try {
     fs.mkdirSync("uploads");
 }
 
-app.get("/", function (req, res) {
-    res.sendFile(__dirname + "/nso/landing.html");
+app.set("view engine", "ejs");
+app.use(bodyParser());
+app.use(cookieParser(process.env.SUPER_SECRET));
+app.use(session({
+    secret: process.env.SUPER_SECRET
+}));
+
+app.post("/", function (req, res, next) {
+    if (!req.body.username || !req.body.password) {
+        return res.redirect("/");
+    }
+    var username = req.body.username;
+    var password = req.body.password;
+    var user = User.getByUsername(username);
+    if (user !== null) {
+        if (!user.checkPassword(password)) {
+            return res.redirect("/");
+        }
+    } else {
+        // create user
+        user = new User(username);
+        user.setPassword(password);
+        user.save();
+    }
+    var token = user.getLoginToken();
+    res.cookie("token", token, { signed: true });
+    res.redirect("/");
+});
+
+app.get("/", User.loginStatus, function (req, res, next) {
+    res.render("index");
 });
 
 app.use(express.static("ext"));

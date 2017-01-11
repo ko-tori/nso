@@ -1,0 +1,20 @@
+<% if (currentUser.isAuthenticated) { %>
+    <% include ../nso/landing.html %>
+<% } else { %>
+    <form method="post">
+        <table>
+            <tr>
+                <td>Username</td>
+                <td><input type="text" autocomplete="off" name="username" autofocus /></td>
+            </tr>
+            <tr>
+                <td>Password</td>
+                <td><input type="password" autocomplete="off" name="password" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit"></td>
+            </tr>
+        </table>
+    </form>
+<% } %>

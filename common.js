@@ -6,7 +6,9 @@ var db = low("db.json", {
 });
 
 db.defaults({
-    rooms: {}
+    rooms: {},
+    users: [],
+    loginTokens: [],
 }).value();
 
 exports.db = db;

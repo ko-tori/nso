@@ -5,20 +5,24 @@
   "main": "server.js",
   "dependencies": {
     "async": "^2.0.0-rc.6",
+    "bcrypt": "^1.0.2",
+    "body-parser": "^1.15.2",
+    "cookie-parser": "^1.4.3",
     "delivery": "https://github.com/ko-tori/Delivery.js/tarball/master",
+    "ejs": "^2.5.5",
     "express": "^4.14.0",
-    "jszip": "^3.1.1",
-    "lowdb": "^0.14.0",
-    "osu-parser": "https://github.com/ko-tori/osu-parser/tarball/master",
-    "socket.io": "^1.4.8",
-    
+    "express-session": "^1.14.2",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.1.1",
     "gulp-uglifyjs": "^0.6.2",
     "gulp-watch": "^4.3.10",
-    "run-sequence": "^1.2.2"
+    "jszip": "^3.1.1",
+    "lowdb": "^0.14.0",
+    "osu-parser": "https://github.com/ko-tori/osu-parser/tarball/master",
+    "run-sequence": "^1.2.2",
+    "socket.io": "^1.4.8"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
