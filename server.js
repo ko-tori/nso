@@ -172,7 +172,7 @@ for (var id in rooms) {
     }
 }
 
-var get_room_list = function () {
+var get_room_list = function (user) {
     return Object.keys(Room.all()).map(function (id) {
         var room = Room.get(id);
         if (room instanceof Room) {
@@ -189,7 +189,10 @@ var generate_osz = function (roomID) {
 };
 
 lobby.on("connection", function (socket) {
-    socket.emit("rooms", get_room_list());
+    socket.on("auth", function (token) {
+        var user = User.getByToken(token);
+        socket.emit("rooms", get_room_list(user));
+    });
     socket.on("get url", function (data) {
         if (!fs.existsSync(path.join("uploads", data.map))) {
             return;
@@ -208,7 +211,7 @@ lobby.on("connection", function (socket) {
         var url = "/d/" + room.id;
         create_room(room.id);
 
-        lobby.emit("rooms", get_room_list());
+        lobby.emit("rooms", get_room_list(user));
         socket.emit("redirect to", url);
     });
     var delivery = dl.listen(socket);
