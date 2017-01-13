@@ -64,9 +64,9 @@
 	li a:hover {
 		background: #ddd;
 	}
-	
-	#norooms {
-		cursor: pointer;
+
+	#norooms a:hover {
+		background: #f4f4f4;
 	}
 	</style>
 </head>
@@ -77,7 +77,7 @@
 		<p>Please upload a beatmap or select the room you would like to join.</p>
 		<div id="dropzone">Drop *.osz</div>
 		<h2>Rooms</h2>
-		<div id="rooms"></div>
+		<div id="rooms"><ul><li id='norooms'><a>Loading...</a></li></ul></div>
 	</div>
 	<div class="remodal-bg">
 		<div id="modal" class="remodal" data-remodal-id="modal">
