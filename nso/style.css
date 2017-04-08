@@ -370,7 +370,7 @@ img {
     left: .5%;
 }
 
-#playcontrols img {
+#playcontrols img, #fullscreen {
     position: absolute;
     height: 3vmin;
     top: 1vmin;
@@ -379,7 +379,7 @@ img {
     filter: blur(.6px);
 }
 
-#playcontrols img.scalable:hover {
+.scalable:hover {
     transform: scale(1.2);
 }
 
@@ -393,6 +393,10 @@ img {
 
 #editorstop {
     left: 90%;
+}
+
+#fullscreen {
+    right: 1%;
 }
 
 #cover {
@@ -464,7 +468,6 @@ img {
     font-size: 18px;
     font-family: "Century Gothic";
     background-color: #ddd;
-    border: 1px solid #C3F4E6;
     border-radius: 4px;
     padding: 1% 2%;
     display: none;

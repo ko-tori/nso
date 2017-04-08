@@ -3,51 +3,25 @@
 <head>
     <title>test</title>
     <style>
-        canvas {
-            position: absolute;
-        }
+    canvas {
+        position: absolute;
+    }
     </style>
-    <script type="text/javascript" src="nso.js"></script>
-    <script type="text/javascript" src="nsoutilstest.js"></script>
 </head>
 
 <body>
-    <!--<canvas id="a" width="1000px" height="1000px"></canvas>-->
     <script type="text/javascript">
-        function r() {
-            return Math.floor(Math.random() * 255);
-        }
-
-        function a(cs) {
-            $('canvas').remove();
-            var pts = [
-                [276, 368],
-                [316, 368],
-                [356, 352]
-            ];
-            
-            var pts2 = passthrough(pts, 75);
-            var res = render_curve(pts2, cs, [255, 255, 255, 0], [255, 0, 0]);
-            var t = Date.now();
-            document.body.appendChild(tint(res[0][0], [140, 140, 140]));
-            document.body.appendChild(tint(res[0][1], c1));
-            document.body.appendChild(res[0][2]);
-            console.log(Date.now()-t);
-            //function a() {return Math.floor(Math.random()*255);}
-            document.body.style.background = '#000'; //'rgb('+a()+','+a()+','+255*a()+')';
-        }
-        var prevcs = 0;
-        var cs = 100;
-        var prevc1 = [];
-        var c1 = [0, 0, 0];
-        setInterval(function() {
-            if (prevc1 != c1 || prevcs != cs){
-                prevcs = cs;
-                prevc1 = c1;
-                a(cs, c1);
-            }
-        }, 100);
+    function a() {
+        window.screen.orientation.lock("landscape-primary").then((status) => {
+            document.body.innerHTML += status;
+        });
+    }
+    function b() {
+        document.body.innerHTML += window.screen.orientation.lock("landscape-primary").then();
+    }
     </script>
+    <button onclick="a()">Unlock</button>
+    <button onclick="b()">Lock</button>
 </body>
 
 </html>

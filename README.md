@@ -7,4 +7,4 @@ Collaborative editor for osu!
 - [x] ~~serialize beatmap function~~ 
 - [ ] rendering _in progress_
 - [ ] editing _in progess_
-- [ ] persist rooms
+- [x] ~~persist rooms~~
