@@ -28,6 +28,7 @@ gulp.task("concat-js", function() {
 			"lib/Player.js",
 			"lib/Skin.js",
 			"lib/ClipboardManager.js",
+			"lib/Util.js",
 
 			// main stuff
 			"lib/Socket.js",
