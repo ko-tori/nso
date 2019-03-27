@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Login</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<% let user = undefined; %>
+	<%- include('header', {user: user}); %>
+	<div id="contents">
+		<h3>Login</h3>
+
+		<form action="/login" method="post">
+			<input id="username_input" autocomplete="off" name="username" placeholder="Enter Username"><br>
+			<input autocomplete="off" type="password" name="password" placeholder="Enter Password"><br>
+			<input type="submit">
+		</form>
+
+		<% if(error) { %>
+		<br><b><%= error %></b><br>
+		<% } %>
+
+		<br><a href="/register">Register</a><br>
+		<a href="/">Home</a>
+	</div>
+	<script type="text/javascript">
+		document.getElementById("username_input").focus();
+	</script>
+</body>
+</html>

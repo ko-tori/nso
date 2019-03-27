@@ -1,24 +1,31 @@
 {
   "name": "nso",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "description": "Lost motivation for the game, making an online collaborative editor now",
   "main": "server.js",
   "dependencies": {
     "async": "^2.0.0-rc.6",
+    "bcrypt-nodejs": "0.0.3",
+    "cookie-parser": "^1.4.4",
     "delivery": "https://github.com/ko-tori/Delivery.js/tarball/master",
+    "ejs": "^2.6.1",
     "express": "^4.14.0",
-    "jszip": "^3.1.1",
-    "lowdb": "^0.14.0",
-    "osu-parser": "https://github.com/ko-tori/osu-parser/tarball/master",
-    "socket.io": "^1.4.8",
-    
+    "express-session": "^1.15.6",
+    "formidable": "^1.2.1",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.1.1",
     "gulp-uglifyjs": "^0.6.2",
     "gulp-watch": "^4.3.10",
-    "run-sequence": "^1.2.2"
+    "jszip": "^3.1.1",
+    "lowdb": "^0.14.0",
+    "osu-parser": "https://github.com/ko-tori/osu-parser/tarball/master",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
+    "rethinkdb": "^2.3.3",
+    "run-sequence": "^1.2.2",
+    "socket.io": "^1.4.8"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

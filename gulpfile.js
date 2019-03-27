@@ -15,7 +15,7 @@ gulp.task("concat-js", function() {
 			"ext/jszip.min.js",
 			"ext/delivery.js",
 			"ext/socket.io.min.js",
-			"nso/nsoutils2.js",
+			"static/nsoutils2.js",
 
 			// other libs
 			"lib/Polyfill.js",
@@ -35,15 +35,15 @@ gulp.task("concat-js", function() {
 		.pipe(sourcemaps.init())
 		.pipe(sourcemaps.write())
 		.pipe(concatjs("nso.js"))
-		.pipe(gulp.dest("nso"));
+		.pipe(gulp.dest("static"));
 });
 
 gulp.task("uglify-js", function() {
-	gulp.src("nso/nso.js")
+	gulp.src("static/nso.js")
 		.pipe(uglify("nso.min.js", {
 			"mangle": false
 		}))
-		.pipe(gulp.dest("nso"));
+		.pipe(gulp.dest("static"));
 });
 
 // gulp.task("concat-css", function() {
