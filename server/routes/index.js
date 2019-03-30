@@ -2,21 +2,14 @@ module.exports = (app, io) => {
 
 var express = require('express');
 var router = express.Router();
-var passport = require('passport');
 var fs = require("fs");
 var JSZip = require("jszip");
 var bcrypt = require('bcrypt-nodejs');
 var formidable = require('formidable');
 var path = require('path');
 var oppai = require('../oppai');
-
-var r = require('rethinkdb');
-var connection;
-
-r.connect({ host: 'localhost', port: 28015 }, function(err, conn) {
-    if (err) throw err;
-    connection = conn;
-})
+var users = require('../db/users');
+var auth = require('../db/auth');
 
 var Beatmap = require("../../lib/Beatmap");
 var Room = require("../../lib/Room");
@@ -113,47 +106,35 @@ router.get('/register', function(req, res) {
 });
 
 router.post('/register', function(req, res, next) {
-	r.db('nso').table('users').filter(r.row('username').eq(req.body.username)).run(connection, function(err, u) {
-		if (err) {
-        console.log('error retrieving users...');
-        return;
-      }
-        u.toArray((err, users) => {
-            if (err || users.length < 1) {
-            	r.db('nso').table('users').insert({
-			        username: req.body.username.trim(),
-			        password: bcrypt.hashSync(req.body.password.trim()),
-			    }).run(connection, function(err, result) {
-			        if (err) {
-			            res.render('register', { error: err.message });
-			        }
-			        console.log('Created user ' + req.body.username.trim());
-			        passport.authenticate('local')(req, res, function() {
-			            req.session.save(function(err) {
-			                if (err) {
-			                    return next(err);
-			                }
-			                res.redirect('/');
-			            });
-			        });
-			    });
-            } else
-            	res.render('register', { error: "User already exists!" });
+	users.createUser(req.body.username.trim(), bcrypt.hashSync(req.body.password.trim()), function(err, result) {
+        if (err) {
+            res.render('register', { error: err.message });
+            return;
+        }
+        console.log('Created user ' + req.body.username.trim());
+        auth.authenticate('local')(req, res, function() {
+            req.session.save(function(err) {
+                if (err) {
+                    return next(err);
+                }
+                res.redirect('/');
+            });
         });
     });  
 });
 
 router.get('/users', function(req, res) {
-	r.db('nso').table('users').filter(r.row('username')).run(connection, function(err, u) {
-        u.toArray((err, users) => {
-        	res.send(users.map(x => x.username).join('\n'));
-        });
+	users.all((err, users) => {
+		res.send(users.map(x => JSON.stringify(x)).join('<br>'))
+    	//res.send(users.map(x => x.username).join('<br>') + '<br><a href="/">Home</a>');
     });
 });
 
 router.get('/resetusers', function(req, res) {
-	r.db('nso').table('users').delete().run(connection);
-	res.send('all users deleted');
+	req.logout();
+	users.clear();
+	console.log('cleared users')
+	res.send('all users deleted<br><a href="/">Home</a>');
 });
 
 router.get('/login', function(req, res) {
@@ -162,7 +143,7 @@ router.get('/login', function(req, res) {
 });
 
 router.post('/login', function(req, res, next) {
-    passport.authenticate('local', function(err, user, info) {
+    auth.authenticate('local', function(err, user, info) {
         if (err) {
             return next(err);
         }
@@ -188,7 +169,7 @@ router.get('/profile', function(req, res) {
             res.redirect(`profile?u=${req.user.username}`);
         }
     } else {
-        r.db('nso').table('users').filter(r.row('username').eq(req.query.u)).run(connection, function(err, u) {
+        users.getUser(req.query.u, function(err, u) {
             u.toArray((err, users) => {
                 if (err || users.length < 1) res.render('profile', { user: req.user, u: undefined });
                 else {
