@@ -30,7 +30,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "concat": "gulp concat-js",
-    "start": "node server.js"
+    "start": "node server/app.js"
   },
   "keywords": [],
   "author": "ko-tori",
