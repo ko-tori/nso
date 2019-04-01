@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css?family=Titillium+Web');
+body {
+	font-family: 'Titillium Web', sans-serif;
+}
+#header {
+	margin: 10px;
+	padding: 0px 15px;
+	display: flex;
+	justify-content: space-between;
+}
+#nso {
+	width: 50%;
+	margin-bottom: 0;
+}
+#header a {
+	color: black;
+}
+#header a:hover {
+	color: rgb(0, 46, 121);
+}
+#login {
+	width: 50%;
+	text-align: right;
+	height: fit-content;
+	padding: 15px;
+}
+#leaderboard {
+	padding-left: 0;
+}
+#leaderboard a, #nso a{
+	transition: all 0.5s;
+	text-decoration: none;
+}
+#leaderboard li {
+	transition: background-color 0.5s;
+	color: black;
+	background-color: #EEE;
+	padding: 5px 10px;
+	margin: 5px;
+	list-style: none;
+}
+#leaderboard li:hover {
+	background-color: #DDD;
+	color: rgb(0, 46, 121);
+}
+#navbar ul {
+	padding-left: 25px;
+	margin:
+}
+#navbar li {
+	transition: background-color 0.5s;
+	color: black;
+	background-color: #EEE;
+	padding: 5px 10px;
+	display: inline-block;
+	list-style: none;
+}
+#navbar li:hover {
+	background-color: #DDD;
+}
+#chals_top {
+	padding: 0px 10px;
+	display: flex;
+	justify-content: space-between;
+}
+#chals_top h2 {
+	margin-top: 5px;
+}
+#chals_title {
+	width: 50%;
+}
+#user_score {
+	width: 50%;
+	text-align: right;
+}
+#chals {
+	margin: 0 10px;
+	left:0;
+	background-color: rgb(150,200,255);
+	border-radius: 50px;
+	padding: 5px 25px 15px;
+}
+.chal {
+	background-color: #EEE;
+	padding: 1px;
+	padding-left: 15px;
+	padding-right: 15px;
+	transition: all .4s;
+	margin-bottom: 5px;
+}
+.chal:hover {
+	background-color: #DEDEDE;
+	border-radius: 25px;
+}
+.incorrect_submission {
+	background-color: #ffafaf !important;
+}
+.correct_submission {
+	background-color: #54ff76 !important;
+}
+.solved {
+	background-color: #c9ffd7;
+}
+.solved:hover {
+	background-color: #a0ffba;
+}
+input[type="submit"]{
+	cursor: pointer;
+}
+#troll {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	overflow: hidden;
+}
+#contents {
+	margin: 20px 10px;
+	padding: 0px 15px;
+}
+input[disabled="true"] {
+	cursor: default;
+}

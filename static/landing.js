@@ -1,7 +1,5 @@
 var socket = io.connect("/lobby");
-var modal = $("[data-remodal-id=modal]").remodal({
-	hashTracking: false
-});
+
 socket.on("connect", function () {
 	var map;
 	var difficulties;
@@ -18,20 +16,6 @@ socket.on("connect", function () {
 		html += "</ul>";
 		$("#rooms").html(html);
 	});
-	socket.on("choose diff", function (options) {
-		map = options.map;
-		difficulties = options.difficulties;
-		console.log("Choosing diff", options);
-		var html = "";
-		html += "<p>Please select your difficulty below.</p>";
-		html += "<select id='choosediff'>";
-		for (var i = 0; i < options.difficulties.length; i += 1) {
-			html += "<option value='" + options.difficulties[i].choice + "'>" + options.difficulties[i].version + "</option>";
-		}
-		html += "</select>";
-		html += "<p><button onclick='javascript:go();'>Edit!</button></p>";
-		$("#modal").html(html);
-	});
 	socket.on("redirect to", function (url) {
 		window.location.href = url;
 	});
@@ -47,17 +31,41 @@ socket.on("connect", function () {
 			}
 		}
 	};
+	window.cancel = function() {
+		$('.modal').fadeOut(500);
+	}
+	var responseHandler = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			var options = JSON.parse(this.response);
+			map = options.map;
+			console.log('map', map);
+			difficulties = options.difficulties;
+			difficulties.sort((a, b) => {
+				return a.stars - b.stars;
+			});
+			console.log("Choosing diff", options);
+			var html = "";
+			html += "<p>Please select your difficulty below.</p>";
+			html += "<select id='choosediff'>";
+			for (var i = 0; i < options.difficulties.length; i += 1) {
+				html += "<option value='" + options.difficulties[i].choice + "'>[" + options.difficulties[i].name + '] ' + options.difficulties[i].stars.toFixed(2) + "*</option>";
+			}
+			html += "</select>";
+			html += "<p><button onclick='javascript:go();'>Edit!</button><br><button onclick='javascript:cancel();'>Cancel</button></p>";
+			$("#modalbox").html(html).fadeTo(500, 1);;
+			$('#overlay').fadeTo(500, 0.8);
+		} else {
+		}
+	};
 	var upload = function (file) {
-		var delivery = new Delivery(socket);
-		delivery.on("delivery.connect", function (delivery) {
-			$("#modal").html("uploading...");
-			modal.open();
-			console.log('sending...');
-			delivery.send(file, {});
-		});
-		delivery.on("send.success", function (file) {
-			console.log("File was sent to the server:", file);
-		});
+		console.log('uploading...');
+		var formData = new FormData();
+		formData.append("mapfile", file);
+		xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = responseHandler;
+		//xhr.onprogress = progressHandler;
+		xhr.open('POST', '/', true);
+		xhr.send(formData);
 	};
 	$("#dropzone").on("drag dragstart dragend dragover dragenter dragleave drop", function (e) {
 		e.preventDefault();
@@ -73,4 +81,9 @@ socket.on("connect", function () {
 			// console.log("Dropped.", e);
 			upload(e.originalEvent.dataTransfer.files[0]);
 		});
+	$('#uploadinput').change(function() {
+		console.log('change', this);
+		upload(this.files[0]);
+	});
 });
+

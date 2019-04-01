@@ -1,6 +1,7 @@
 node_modules
 uploads
 oszcache
+tempuploads
 npm-debug.log
 run*
 nso/nso.js

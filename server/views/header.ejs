@@ -1,0 +1,27 @@
+<div id="header">
+	<h1 id="nso"><a href="/">editor¡nso</a></h1>
+	<div id="login">
+		<% if (user) { %>
+			Welcome, <a href="/u"><b><%= user.username %>!</b></a> | <a href="/logout">Log Out</a>
+		<% } else { %>
+			<b>Not logged in.</b> &nbsp; <a href="login">Login</a> | <a href="/register">Register</a>
+		<% } %>
+	</div>
+</div>
+<% if (user) { %>
+	<nav id="navbar">
+		<ul>
+			<a href="/"><li>Home</li></a>
+			<a href="/users"><li>Users</li></a>
+			<a href="/u"><li>Profile</li></a>
+		</ul>
+	</nav>
+<% } else { %>
+	<nav id="navbar">
+		<ul>
+			<a href="/"><li>Home</li></a>
+			<a href="/users"><li>Users</li></a>
+		</ul>
+	</nav>
+<% } %>
+<hr>

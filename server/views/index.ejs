@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>editor¡nso</title>
+	<link rel="stylesheet" type="text/css" href="/style.css">
+	<link rel="stylesheet" type="text/css" href="/landing.css">
+</head>
+
+<body>
+	<%- include('header', {user: user}); %>
+	<div id="contents">
+		<h4>Welcome to editor¡nso</h4>
+		<% if (true || user) { %>
+		<div id="dropzone">Drop *.osz or <input type='file' id='uploadinput'><label id='uploadinputlabel' for='uploadinput'>Browse files...</label></div>
+		<h3>Rooms</h3>
+		<div id="rooms"><ul><li id='norooms'><a>Loading...</a></li></ul></div>
+		<% } else { %>
+			<p>Please <a href='login'>log in</a> to use the editor. If you don't have an account head to the <a href='register'>registration page</a>.</p>
+		<% } %>
+	</div>
+	<div class='modal' id='overlay'></div>
+	<div class='modal' id='modalbox'></div>
+	<script src="jquery.min.js"></script>
+	<script src="socket.io.min.js"></script>
+	<script src="landing.js"></script>
+</body>
+
+</html>
