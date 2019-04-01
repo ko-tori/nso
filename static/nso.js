@@ -2302,7 +2302,7 @@ class Socket {
 			// });
 		} else {
 			console.log('%cDifficulty not found!', 'color: #F00');
-			alert('Room does not exist. Redirecting to homepage...');
+			alert('Room does not exist. Redirecting to homepagea...');
 			window.location.href = window.location.origin;
 		}
 	}
@@ -2415,7 +2415,7 @@ class Socket {
 			});
 
 			socket.on("badurl", function (data) {
-				alert('Room does not exist. Redirecting to homepage...');
+				alert('Room does not exist. Redirecting to homepaage...');
 				window.location.href = window.location.origin;
 			});
 

@@ -1,24 +1,21 @@
-var r = require('rethinkdb');
-var connection;
+const config = require('./config');
 
-r.connect({ host: 'localhost', port: 28015 }, function(err, conn) {
-    if (err) throw err;
-    connection = conn;
-    r.dbCreate('nso').run(connection, function(err, res) {
-        if (!err) {
-            console.log('Created nso database!');
-        }
-    });
-    r.db('nso').tableCreate('maps').run(connection, function(err, res) {
-        if (!err) {
-            console.log('Created table "maps"!');
-        }
-    });
+const mongo = require('mongodb').MongoClient;
+var maps;
+
+mongo.connect(config.url, { useNewUrlParser: true }, function(err, client) {
+	if (err) {
+		console.error(err);
+		return;
+	}
+
+	maps = client.db('nso').collection('maps');
 });
+
 
 class Maps {
 	static get(id, callback) {
-		r.db('nso').table('maps').get(id).run(connection, callback);
+		maps.findOne({ '_id': id }, callback);
 	}
 }
 
