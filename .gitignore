@@ -4,6 +4,6 @@ oszcache
 tempuploads
 npm-debug.log
 run*
-nso/nso.js
+static/nso.js
 db.json
 TODO
