@@ -1,9 +1,6 @@
 node_modules
 uploads
-oszcache
 tempuploads
 npm-debug.log
 run*
 static/nso.js
-db.json
-TODO
