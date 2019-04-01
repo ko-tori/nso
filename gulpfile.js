@@ -27,6 +27,7 @@ gulp.task("concat-js", function() {
 			"lib/Beatmap.js",
 			"lib/Player.js",
 			"lib/Skin.js",
+			"lib/MapUtils.js",
 
 			// main stuff
 			"lib/Socket.js",
@@ -71,5 +72,5 @@ gulp.task("watch", function() {
 });
 
 gulp.task("default", function() {
-	gulp.start("concat-js", "uglify-js" /*, "concat-css", "minify-css"*/ );
+	gulp.start("concat-js");//, "uglify-js" /*, "concat-css", "minify-css"*/ );
 });

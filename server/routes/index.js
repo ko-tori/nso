@@ -69,6 +69,12 @@ router.get('/resetusers', function(req, res) {
 	res.send('all users deleted<br><a href="/">Home</a>');
 });
 
+router.get('/resetrooms', function(req, res) {
+    Room.clear();
+    console.log('cleared rooms')
+    res.send('all rooms deleted<br><a href="/">Home</a>');
+});
+
 router.get('/login', function(req, res) {
     if (req.user) res.redirect('/');
     else res.render('login', { user: req.user, error: req.query.err });

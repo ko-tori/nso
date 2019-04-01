@@ -2,6 +2,7 @@ var fs = require("fs");
 var path = require("path");
 
 var Beatmap = require("../../lib/Beatmap");
+var MapUtils = require("../../lib/MapUtils");
 var Util = require("../../lib/Util");
 const config = require('./config');
 
@@ -10,7 +11,7 @@ var rooms;
 var roomObjs = {};
 var io;
 
-const saveTimeout = 1000;
+const saveTimeout = 5000;
 
 mongo.connect(config.url, { useNewUrlParser: true }, function(err, client) {
     if (err) {
@@ -34,6 +35,11 @@ class Room {
 
 	static all() {
         return roomObjs;
+    }
+
+    static clear() {
+        rooms.drop();
+        roomObjs = {};
     }
 
     static getPublicList() {
@@ -117,10 +123,12 @@ class Room {
                 });
 
                 socket.on('edit move', data => {
-                    var obj = beatmap.matchObj(HitObject.parse(data[0]));
+                    var obj = beatmap.matchObj(data[0]);
                     if (obj) {
-                        obj.position.x = data[1];
-                        obj.position.y = data[2];
+                        var dx = data[1] - obj.position.x,
+                            dy = data[2] - obj.position.y;
+
+                        MapUtils.moveObject(obj, dx, dy);
                     } else {
                         //console.log('object not found!');
                     }
@@ -150,14 +158,12 @@ class Room {
     save() {
         let time = new Date().getTime();
         if (time - this.previousSaveTime > saveTimeout) {
-            console.log('saving room ' + this.id);
+            //console.log('saving room ' + this.id);
             rooms.updateOne({ id: this.id }, { $set: this.serialize() }, { upsert: true }, (err, result) => {
-                if (err) {
+                if (err)
                     console.error(err);
-                    console.log('failed to save room ' + this.id);
-                }
                 else {
-                    console.log('saved room ' + this.id);
+                    //console.log('saved room ' + this.id);
                     this.previousSaveTime = time;
                 }
             });
