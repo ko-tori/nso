@@ -1,9 +1,0 @@
-editor layout:
-- playfield: 720/900 = 80%
-- top bar: 120/900 = 13.33%
-- compose/design/timing/song setup: 35/900 = 3.88%
-- bottom (timeline and stuff): 38/900 = 4.22%
-- file/edit/view/compose...: 24/900 = 2.66%
-
-grid: 512x384
-128x96 cells
